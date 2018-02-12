@@ -83,8 +83,8 @@ public class FileService implements IFileService {
 
     @Override
     public void putFile(MultipartFile file, String path, String bucket, String accessId, Long expires, String signature) throws Exception {
-        String resource = "/" + bucket + "/" + path;
-        authDao.validSignature(resource, accessId, expires, signature, RequestMethod.POST);
+//        String resource = "/" + bucket + "/" + path;
+//        authDao.validSignature(resource, accessId, expires, signature, RequestMethod.POST);
         Bucket buck = bucketDao.getBucketByName(bucket);
         if (null == buck) {
             throw new ErrorCodeException(ResponseCodeEnum.BUCKET_NOT_EXIST);
@@ -101,8 +101,8 @@ public class FileService implements IFileService {
             fileEntity.setSize(fileHandleStatus.getSize());
             fileEntity.update();
         } else {
-            //TODO assign key 单点故障
-            FileHandleStatus fileHandleStatus = fileTemplate.saveFileByStream(fileName, file.getInputStream());
+            //TODO assign key 单点故障; collection; 运行时有master宕机的情况
+            FileHandleStatus fileHandleStatus = fileTemplate.saveFileByStream(fileName, file.getInputStream(), bucket);
             fileEntity = new File(fileName, fileHandleStatus.getFileId(), purePath, fileHandleStatus.getSize(), buck.getId());
             fileEntity.setFolderId(createFolders(purePath, buck.getId()));
             fileEntity.save();
