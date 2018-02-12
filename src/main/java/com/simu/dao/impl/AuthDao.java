@@ -24,9 +24,9 @@ public class AuthDao implements IAuthDao{
     private String accessKey;
 
     @Override
-    public void validSignature(String resource, String accessId, long expires, String signature, RequestMethod verb) throws Exception{
+    public void validSignature(String resource, String accessId, Long expires, String signature, RequestMethod verb) throws Exception{
         // expire test
-        if (new Date().getTime() > expires * 1000){
+        if (null == expires || new Date().getTime() > expires * 1000){
             throw new ErrorCodeException(ResponseCodeEnum.AUTH_SIGNATURE_EXPIRED);
         }
         if (!accessId.equals(this.accessId)){

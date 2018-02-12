@@ -17,5 +17,5 @@ public interface IAuthDao {
      * @param verb
      * @throws Exception
      */
-    void validSignature(String resource, String accessId, long expires, String signature, RequestMethod verb) throws Exception;
+    void validSignature(String resource, String accessId, Long expires, String signature, RequestMethod verb) throws Exception;
 }

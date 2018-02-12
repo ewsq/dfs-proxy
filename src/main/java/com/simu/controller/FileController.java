@@ -1,5 +1,6 @@
 package com.simu.controller;
 
+import com.simu.dto.SimpleResponse;
 import com.simu.seaweedfs.core.FileSource;
 import com.simu.seaweedfs.core.FileTemplate;
 import com.simu.service.IFileService;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -37,7 +39,7 @@ public class FileController {
     public ResponseEntity<byte[]> download(@RequestParam(value = "Path") String path,
                                            @RequestParam(value = "Bucket") String bucket,
                                            @RequestParam(value = "AccessKeyId", required = false) String accessKeyId,
-                                           @RequestParam(value = "Expires", required = false) long expires,
+                                           @RequestParam(value = "Expires", required = false) Long expires,
                                            @RequestParam(value = "Signature", required = false) String signature) throws Exception{
         //下载文件
 //        return path + "?"+accessKeyId + "&" + expires + "&"+signature;
@@ -58,16 +60,21 @@ public class FileController {
         return fileService.getFile(path, bucket, accessKeyId, expires, signature);
     }
 
-    @RequestMapping(value = "/upload", method = RequestMethod.PUT)
+    @RequestMapping(value = "/upload", method = RequestMethod.POST)
     @ResponseBody
-    public String uploadFile(@RequestParam(value = "Path") String path,
-                             @RequestParam(value = "Bucket") String bucket,
-                             @RequestParam(value = "File")CommonsMultipartFile file,
-                             @RequestParam(value = "AccessKeyId", required = false) String accessKeyId,
-                             @RequestParam(value = "Expires", required = false) long expires,
-                             @RequestParam(value = "Signature", required = false) String signature,
-                             @RequestParam(value = "Callback", required = false)String callbackUrl){
-
-        return "";
+    public SimpleResponse uploadFile(@RequestParam(value = "Path") String path,
+                                     @RequestParam(value = "Bucket") String bucket,
+                                     @RequestParam(value = "File")MultipartFile file,
+                                     @RequestParam(value = "AccessKeyId", required = false) String accessKeyId,
+                                     @RequestParam(value = "Expires", required = false) Long expires,
+                                     @RequestParam(value = "Signature", required = false) String signature,
+                                     @RequestParam(value = "Callback", required = false)String callbackUrl) throws Exception{
+        if (expires == null){
+            expires = 0L;
+        }
+        fileService.putFile(file,path,bucket,accessKeyId,expires,signature);
+        return SimpleResponse.ok(null);
     }
+
+
 }

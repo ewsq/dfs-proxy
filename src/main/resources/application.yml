@@ -12,6 +12,14 @@ weed:
     accessId: MtwtIlsti1P6UKDx
     accessKey: JN7fXj9sNPbLkfUTQh1zcJpwLPncHo
 
+multipart:
+  enabled: true
+spring:
+  http:
+    multipart:
+      max-file-size: 500000KB
+      max-request-size: 500000KB
+
 ####################### stream Config & Datasource Config###########################
 druid:
   datasource:

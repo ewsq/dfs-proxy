@@ -22,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.annotation.PostConstruct;
@@ -57,29 +58,33 @@ public class FileService implements IFileService {
     }
 
     @Override
-    public ResponseEntity getFile(String path, String bucket, String accessId, long expires, String signature) throws Exception {
-        //TODO 判断 bucket的公开性
+    public ResponseEntity getFile(String path, String bucket, String accessId, Long expires, String signature) throws Exception {
         Bucket buck = bucketDao.getBucketByName(bucket);
         if (null == buck) {
             throw new ErrorCodeException(ResponseCodeEnum.BUCKET_NOT_EXIST);
         }
+        String fileName = FileUtil.getSimpleFileName(path);
+        String purePath = FileUtil.getPurePath(path);
+        File fileEntity = fileDao.getFileByPath(buck.getId(), purePath, fileName);
+        if (null == fileEntity){
+            throw new ErrorCodeException(ResponseCodeEnum.FILE_NOT_EXIST);
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-
-        if (buck.getIsPublic() == 1) {
-            // 公开
-
+        if (buck.getIsPublic() == 0) {
+            // 私密
+            String resource = "/" + bucket + "/" + path;
+            authDao.validSignature(resource, accessId, expires, signature, RequestMethod.GET);
         }
-
-        headers.setContentDispositionFormData("attachment", "abc.zip");
-        ByteArrayOutputStream byteArrayOutputStream = (ByteArrayOutputStream) fileTemplate.getFileStream("2,02e1b65433").getOutputStream();
+        headers.setContentDispositionFormData("attachment", fileEntity.getName());
+        ByteArrayOutputStream byteArrayOutputStream = (ByteArrayOutputStream) fileTemplate.getFileStream(fileEntity.getNumber()).getOutputStream();
         return new ResponseEntity<>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.CREATED);
     }
 
     @Override
-    public void putFile(CommonsMultipartFile file, String path, String bucket, String accessId, long expires, String signature) throws Exception {
+    public void putFile(MultipartFile file, String path, String bucket, String accessId, Long expires, String signature) throws Exception {
         String resource = "/" + bucket + "/" + path;
-        authDao.validSignature(resource, accessId, expires, signature, RequestMethod.PUT);
+        authDao.validSignature(resource, accessId, expires, signature, RequestMethod.POST);
         Bucket buck = bucketDao.getBucketByName(bucket);
         if (null == buck) {
             throw new ErrorCodeException(ResponseCodeEnum.BUCKET_NOT_EXIST);
@@ -96,9 +101,11 @@ public class FileService implements IFileService {
             fileEntity.setSize(fileHandleStatus.getSize());
             fileEntity.update();
         } else {
+            //TODO assign key 单点故障
             FileHandleStatus fileHandleStatus = fileTemplate.saveFileByStream(fileName, file.getInputStream());
             fileEntity = new File(fileName, fileHandleStatus.getFileId(), purePath, fileHandleStatus.getSize(), buck.getId());
-
+            fileEntity.setFolderId(createFolders(purePath, buck.getId()));
+            fileEntity.save();
         }
     }
 

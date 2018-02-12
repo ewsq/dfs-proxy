@@ -1,6 +1,7 @@
 package com.simu.service;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 /**
@@ -17,7 +18,7 @@ public interface IFileService {
      * @param signature
      * @return
      */
-    ResponseEntity getFile(String path, String bucket, String accessId, long expires, String signature) throws Exception;
+    ResponseEntity getFile(String path, String bucket, String accessId, Long expires, String signature) throws Exception;
 
     /**
      * 上传文件流
@@ -29,7 +30,7 @@ public interface IFileService {
      * @param signature
      * @throws Exception
      */
-    void putFile(CommonsMultipartFile file, String path, String bucket, String accessId, long expires, String signature) throws Exception;
+    void putFile(MultipartFile file, String path, String bucket, String accessId, Long expires, String signature) throws Exception;
 
     /**
      * 返回最下层的folderId
