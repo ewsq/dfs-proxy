@@ -1,0 +1,77 @@
+weed:
+  collections:
+    dev-pri: mkpri
+    dev-pub: mkpub
+    integration-pri: mkpri-integration
+    integration-pub: mkpub-integration
+    stable-pri: mkpri-stable
+    stable-pub: mkpub-stable
+  servers:
+    urls: 192.168.1.204:9333,192.168.1.100:9333,192.168.1.200:9333
+  auth:
+    accessId: MtwtIlsti1P6UKDx
+    accessKey: JN7fXj9sNPbLkfUTQh1zcJpwLPncHo
+
+####################### stream Config & Datasource Config###########################
+druid:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/simu_dfs_proxy?autoReconnect=true&rewriteBatchedStatements=true&socketTimeout=30000&connectTimeout=3000&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: gdr121250037
+    #初始化连接数量，最大最小连接数
+    initialSize: 5
+    maxActive: 10
+    minIdle: 3
+    #获取连接等待超时的时间
+    maxWait: 600000
+    #超过时间限制是否回收
+    removeAbandoned: true
+    #超过时间限制多长
+    removeAbandonedTimeout: 180
+    #配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+    timeBetweenEvictionRunsMillis: 600000
+    #配置一个连接在池中最小生存的时间，单位是毫秒
+    minEvictableIdleTimeMillis: 300000
+    #用来检测连接是否有效的sql，要求是一个查询语句
+    #申请连接的时候检测
+    testWhileIdle: true
+    #申请连接时执行validationQuery检测连接是否有效，配置为true会降低性能
+    testOnBorrow: false
+    #归还连接时执行validationQuery检测连接是否有效，配置为true会降低性能
+    testOnReturn: false
+    #打开PSCache，并且指定每个连接上PSCache的大小
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 50
+    #属性类型是字符串，通过别名的方式配置扩展插件，常用的插件有：
+    #监控统计用的filter:stat 日志用的filter:log4j 防御SQL注入的filter:wall
+    filters: stat
+
+################# flyway Config ###################
+
+flyway:
+  base-line-on-migrate: true
+  table: flyway_version
+  base-line-version: 1.0
+  skip-default-resolvers: false
+  locations: classpath:db.migration
+  is-enable-flyway-migration: true
+  out-of-order: false
+  repair: false
+################# ribbon & hystrix Config ###################
+
+ribbon:
+  ReadTimeout: 10000
+
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+        isolation:
+          strategy: THREAD
+          thread:
+            timeoutInMilliseconds: 1000000
+headers:
+  simu:
+    userid : X-SIMU-UserId
