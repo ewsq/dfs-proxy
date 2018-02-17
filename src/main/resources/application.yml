@@ -7,7 +7,7 @@ weed:
     stable-pri: mkpri-stable
     stable-pub: mkpub-stable
   servers:
-    urls: 192.168.1.204:9333,192.168.1.100:9333,192.168.1.200:9333
+    urls: localhost:9333
   auth:
     accessId: MtwtIlsti1P6UKDx
     accessKey: JN7fXj9sNPbLkfUTQh1zcJpwLPncHo

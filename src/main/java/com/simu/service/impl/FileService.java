@@ -101,7 +101,7 @@ public class FileService implements IFileService {
             fileEntity.setSize(fileHandleStatus.getSize());
             fileEntity.update();
         } else {
-            //TODO assign key 单点故障; collection; 运行时有master宕机的情况
+            //TODO assign key 单点故障; 运行时有master宕机的情况
             FileHandleStatus fileHandleStatus = fileTemplate.saveFileByStream(fileName, file.getInputStream(), bucket);
             fileEntity = new File(fileName, fileHandleStatus.getFileId(), purePath, fileHandleStatus.getSize(), buck.getId());
             fileEntity.setFolderId(createFolders(purePath, buck.getId()));
