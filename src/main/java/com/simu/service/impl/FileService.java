@@ -15,6 +15,8 @@ import com.simu.seaweedfs.core.file.FileHandleStatus;
 import com.simu.service.IFileService;
 import com.simu.utils.FileUtil;
 import com.simu.utils.TimeUtil;
+import com.simu.vo.SimpleFileVO;
+import com.simu.vo.SimpleFolderVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,12 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author DengrongGuan
@@ -34,9 +42,6 @@ import java.io.ByteArrayOutputStream;
  **/
 @Service
 public class FileService implements IFileService {
-
-    @Autowired
-    FileSource fileSource;
 
     @Autowired
     IBucketDao bucketDao;
@@ -50,12 +55,8 @@ public class FileService implements IFileService {
     @Autowired
     IFolderDao folderDao;
 
+    @Autowired
     FileTemplate fileTemplate;
-
-    @PostConstruct
-    public void init() {
-        this.fileTemplate = new FileTemplate(fileSource.getConnection());
-    }
 
     @Override
     public ResponseEntity getFile(String path, String bucket, String accessId, Long expires, String signature) throws Exception {
@@ -111,10 +112,20 @@ public class FileService implements IFileService {
     }
 
     public long createFolders(String purePath, long bucketId) {
+        purePath = purePath.replace(" ","");
+        if ("".equals(purePath)){
+            throw new ErrorCodeException(ResponseCodeEnum.BAD_REQUEST_PARAM.getCode(),ResponseCodeEnum.BAD_REQUEST_PARAM.getMsg()+":path");
+        }
+        if (bucketDao.findById(bucketId) == null){
+            throw new ErrorCodeException(ResponseCodeEnum.BUCKET_NOT_EXIST);
+        }
         String[] folders = purePath.split("/");
         String parentPath = "";
         long parentId = 0;
         for (int i = 0; i < folders.length; i++) {
+            if ("".equals(folders[i])){
+                throw new ErrorCodeException(ResponseCodeEnum.BAD_REQUEST_PARAM.getCode(),ResponseCodeEnum.BAD_REQUEST_PARAM.getMsg()+":path");
+            }
             Folder folder = folderDao.getFolderByPath(bucketId, parentPath, folders[i]);
             if (null == folder) {
                 folder = new Folder(folders[i], parentPath, parentId, bucketId);
@@ -129,4 +140,74 @@ public class FileService implements IFileService {
         }
         return parentId;
     }
+
+    @Override
+    public void deleteFilesByBucketId(long bucketId){
+        List<File> files = fileDao.getFilesByBucketId(bucketId);
+        files.stream().forEach(file -> {
+            safeDeleteFile(file.getNumber());
+            fileDao.deleteFile(file.getId());
+        });
+    }
+
+    @Override
+    public Map<String,List> getFileAndFoldersByPath(long bucketId, String path, String keyword) {
+        List<SimpleFolderVO> simpleFolderVOS = new ArrayList<>();
+        List<SimpleFileVO> simpleFileVOS = new ArrayList<>();
+        if (null == path){
+            path = "";
+        }else {
+            path = path.substring(0,path.length()-1);
+        }
+        List<Folder> folders = folderDao.getFoldersByPath(bucketId, path, keyword);
+        simpleFolderVOS.addAll(folders.stream().map(a -> new SimpleFolderVO(a)).collect(Collectors.toList()));
+        List<File> files = fileDao.getFilesByPath(bucketId, path, keyword);
+        simpleFileVOS.addAll(files.stream().map(a -> new SimpleFileVO(a)).collect(Collectors.toList()));
+        Map<String,List> res = new HashMap<>();
+        res.put("folders",simpleFolderVOS);
+        res.put("files",simpleFileVOS);
+        return res;
+    }
+
+    @Override
+    public void rmFiles(Long[] fileIds) {
+        for (Long id:fileIds){
+            File file = fileDao.deleteFile(id);
+            if (null != file){
+                safeDeleteFile(file.getNumber());
+            }
+        }
+    }
+
+    @Override
+    public void rmFolders(Long[] folderIds) {
+        // 直接使用like无需递归
+        for (Long id: folderIds){
+            Folder folder = folderDao.findById(id);
+            if (null != folder){
+                String pathPrefix = folder.getPath()+"/"+folder.getName();
+                List<File> files = fileDao.getFilesInPath(folder.getBucketId(), pathPrefix);
+                files.stream().forEach(file -> {
+                    safeDeleteFile(file.getNumber());
+                    file.delete();
+                });
+                List<Folder> folders = folderDao.getFoldersInPath(folder.getBucketId(), pathPrefix);
+                folders.stream().forEach(f -> f.delete());
+            }
+            folder.delete();
+        }
+    }
+
+    /**
+     * delete file without throw IOException
+     * @param fileNumber
+     */
+    private void safeDeleteFile(String fileNumber){
+        try {
+            fileTemplate.deleteFile(fileNumber);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

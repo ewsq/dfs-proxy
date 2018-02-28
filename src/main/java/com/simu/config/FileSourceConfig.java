@@ -2,6 +2,7 @@ package com.simu.config;
 
 import com.simu.seaweedfs.core.FileSource;
 import com.simu.seaweedfs.core.FileTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,5 +24,10 @@ public class FileSourceConfig {
         fileSource.setConnectionTimeout(1000);
         fileSource.startup();
         return fileSource;
+    }
+
+    @Bean("fileTemplate")
+    public FileTemplate getFileTemplate(@Qualifier("fileSource") FileSource fileSource){
+        return new FileTemplate(fileSource.getConnection());
     }
 }

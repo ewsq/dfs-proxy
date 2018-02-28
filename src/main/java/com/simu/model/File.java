@@ -1,5 +1,6 @@
 package com.simu.model;
 
+import com.simu.utils.TimeUtil;
 import org.exemodel.orm.ExecutableModel;
 
 import javax.persistence.GeneratedValue;
@@ -23,7 +24,7 @@ public class File extends ExecutableModel {
     private long folderId;
     private long bucketId;
     private Timestamp createTime;
-    private Timestamp modifyTime;
+    private Timestamp modifyTime = TimeUtil.getCurrentSqlTime();
 
     public File(){}
 

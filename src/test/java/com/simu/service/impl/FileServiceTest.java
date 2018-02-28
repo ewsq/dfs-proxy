@@ -13,7 +13,7 @@ public class FileServiceTest extends BaseTest{
     IFileService fileService;
     @Test
     public void createFolders() throws Exception {
-        fileService.createFolders("a/b/c",1);
+        fileService.createFolders("a/ /c",1);
     }
 
 }

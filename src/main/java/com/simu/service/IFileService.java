@@ -1,8 +1,13 @@
 package com.simu.service;
 
+import com.simu.vo.SimpleFileVO;
+import com.simu.vo.SimpleFolderVO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author DengrongGuan
@@ -39,4 +44,32 @@ public interface IFileService {
      * @return c 的id
      */
     long createFolders(String purePath, long bucketId);
+
+    /**
+     *
+     * @param bucketId
+     * @throws Exception from fileTemplate.deleteFile
+     */
+    void deleteFilesByBucketId(long bucketId);
+
+    /**
+     * 获取文件夹下的文件和文件夹
+     * @param bucketId
+     * @param path "a/b/c/" null
+     * @param keyword 可能为null
+     * @return
+     */
+    Map<String,List> getFileAndFoldersByPath(long bucketId, String path, String keyword);
+
+    /**
+     * 批量删除文件,有出错的直接抛出异常
+     * @param fileIds
+     */
+    void rmFiles(Long[] fileIds);
+
+    /**
+     * 批量删除文件夹,有出错的直接抛异常
+     * @param folderIds
+     */
+    void rmFolders(Long[] folderIds);
 }

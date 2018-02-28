@@ -1,8 +1,8 @@
 package com.simu.model;
 
+import com.simu.utils.TimeUtil;
 import org.exemodel.orm.ExecutableModel;
 
-import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -20,7 +20,7 @@ public class Bucket extends ExecutableModel{
     private String name;
     private int isPublic;
     private Timestamp createTime;
-    private Timestamp modifyTime;
+    private Timestamp modifyTime = TimeUtil.getCurrentSqlTime();
 
     public long getId() {
         return id;
