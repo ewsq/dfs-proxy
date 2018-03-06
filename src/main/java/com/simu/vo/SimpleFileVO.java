@@ -14,6 +14,7 @@ public class SimpleFileVO{
     private Timestamp modifyTime;
     private double size;
     private String number;
+    private String downloadPath;
 
     public SimpleFileVO(){}
 
@@ -23,6 +24,15 @@ public class SimpleFileVO{
         this.size = file.getSize();
         this.number = file.getNumber();
         this.modifyTime = file.getModifyTime();
+        this.downloadPath = file.getPath().equals("")?this.name:file.getPath()+"/"+this.name;
+    }
+
+    public String getDownloadPath() {
+        return downloadPath;
+    }
+
+    public void setDownloadPath(String downloadPath) {
+        this.downloadPath = downloadPath;
     }
 
     public long getId() {

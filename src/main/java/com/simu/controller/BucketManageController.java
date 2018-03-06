@@ -46,5 +46,13 @@ public class BucketManageController {
         return SimpleResponse.ok(1);
     }
 
+    @RequestMapping(value = "/addBucket", method = RequestMethod.POST)
+    @ResponseBody
+    public SimpleResponse addBucket(@RequestBody Bucket bucket){
+        bucket.checkParam();
+        bucket.save();
+        return SimpleResponse.ok(1);
+    }
+
 
 }

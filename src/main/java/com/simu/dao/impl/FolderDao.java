@@ -5,6 +5,7 @@ import com.simu.dao.IFolderDao;
 import com.simu.model.Folder;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,6 +40,9 @@ public class FolderDao implements IFolderDao {
 
     @Override
     public List<Folder> getFoldersInPath(long bucketId, String pathPrefix) {
-        return DStatement.build(Folder.class).bucketId(bucketId).pathPrefix(pathPrefix).selectList();
+        List<Folder> folders = new ArrayList<>();
+        folders.addAll(DStatement.build(Folder.class).bucketId(bucketId).path(pathPrefix).selectList());
+        folders.addAll(DStatement.build(Folder.class).bucketId(bucketId).pathPrefix(pathPrefix+"/").selectList());
+        return folders;
     }
 }

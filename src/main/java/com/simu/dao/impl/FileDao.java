@@ -5,6 +5,7 @@ import com.simu.dao.IFileDao;
 import com.simu.model.File;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,7 +43,10 @@ public class FileDao implements IFileDao {
 
     @Override
     public List<File> getFilesInPath(long bucketId, String pathPrefix) {
-        return DStatement.build(File.class).bucketId(bucketId).pathPrefix(pathPrefix).selectList();
+        List<File> files = new ArrayList<>();
+        files.addAll(DStatement.build(File.class).bucketId(bucketId).path(pathPrefix).selectList());
+        files.addAll(DStatement.build(File.class).bucketId(bucketId).pathPrefix(pathPrefix+"/").selectList());
+        return files;
     }
 
 

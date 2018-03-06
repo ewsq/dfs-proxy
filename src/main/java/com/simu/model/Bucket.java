@@ -1,5 +1,7 @@
 package com.simu.model;
 
+import com.simu.constant.ResponseCodeEnum;
+import com.simu.exception.ErrorCodeException;
 import com.simu.utils.TimeUtil;
 import org.exemodel.orm.ExecutableModel;
 
@@ -64,5 +66,10 @@ public class Bucket extends ExecutableModel{
 
     public void setModifyTime(Timestamp modifyTime) {
         this.modifyTime = modifyTime;
+    }
+    public void checkParam(){
+        if (null == name || "".equals(name)){
+            throw new ErrorCodeException(ResponseCodeEnum.BAD_REQUEST_PARAM.getCode(), "name");
+        }
     }
 }

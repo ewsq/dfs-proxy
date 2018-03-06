@@ -19,7 +19,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/file/**","/bucket-manage/**", "/file-manage/**").permitAll()
+                .antMatchers("/css/**", "/js/**","/images/**", "/webjars/**", "/fonts/**", "/file/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
@@ -32,14 +32,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().ignoringAntMatchers("/file/**");
 
         //TODO 先暂时禁止方便测试
-        http.csrf().disable();
+//        http.csrf().disable();
     }
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth
                 .inMemoryAuthentication()
-                .withUser("user").password("password").roles("USER");
+                .withUser("user").password("password").roles("ADMIN");
     }
 
 }

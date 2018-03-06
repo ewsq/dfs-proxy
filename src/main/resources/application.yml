@@ -19,7 +19,25 @@ spring:
     multipart:
       max-file-size: 500000KB
       max-request-size: 500000KB
-
+  thymeleaf:
+      cache: true
+  # Check that the templates location exists.
+      check-template-location: true
+  # Content-Type value.
+      content-type: text/html
+  # Enable MVC Thymeleaf view resolution.
+      enabled: true
+  # Template encoding.
+      encoding: UTF-8
+  # Comma-separated list of view names that should be excluded from resolution.
+  #    excluded-view-names:
+  # Template mode to be applied to templates. See also StandardTemplateModeHandlers.
+      mode: HTML5
+  # Prefix that gets prepended to view names when building a URL.
+      prefix: classpath:/templates/
+  # Suffix that gets appended to view names when building a URL.
+      suffix: .html
+  #    template-resolver-order: # Order of the template resolver in the chain. spring.thymeleaf.view-names= # Comma-separated list of view names that can be resolved.
 ####################### stream Config & Datasource Config###########################
 druid:
   datasource:

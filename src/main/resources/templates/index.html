@@ -1,11 +1,203 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
-<head>
-    <meta charset="UTF-8" />
-    <title>Title</title>
+<head lang="en" th:include="fragments/header :: header">
+
+    <style id="customCss" type="text/css">
+      @import "css/dashboard.css"
+    </style>
+    <title id="pageTitle">首页</title>
 </head>
+
 <body>
-<h1 th:text="${host}">Hello World</h1>
-<p>点击 <a th:href="@{/hello}">这里</a> 打个招呼吧</p>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">思目文件管理系统</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <!--<li><a href="#">Dashboard</a></li>-->
+                <!--<li><a href="#">Settings</a></li>-->
+                <!--<li><a href="#">Profile</a></li>-->
+                <li><form th:action="@{/logout}" method="post" class="navbar-form">
+                    <input class="btn btn-default" type="submit" value="注销" />
+                </form></li>
+            </ul>
+            <form class="navbar-form navbar-right">
+                <input type="text" class="form-control" placeholder="搜索..." />
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li class="active"><a href="/index">文件管理 <span class="sr-only">(current)</span></a></li>
+                <li><a href="#">系统管理</a></li>
+                <li><a href="#">更多功能</a></li>
+            </ul>
+            <!--<ul class="nav nav-sidebar">-->
+                <!--<li><a href="">Nav item again</a></li>-->
+                <!--<li><a href="">One more nav</a></li>-->
+                <!--<li><a href="">Another nav item</a></li>-->
+                <!--<li><a href="">More navigation</a></li>-->
+            <!--</ul>-->
+            <!--<ul class="nav nav-sidebar">-->
+                <!--<li><a href="">Nav item again</a></li>-->
+                <!--<li><a href="">One more nav</a></li>-->
+                <!--<li><a href="">Another nav item</a></li>-->
+            <!--</ul>-->
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <!--<h1 class="page-header">文件管理</h1>-->
+
+            <!--<div class="row placeholders">-->
+                <!--<div class="col-xs-6 col-sm-3 placeholder">-->
+                    <!--<img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail" />-->
+                    <!--<h4>Label</h4>-->
+                    <!--<span class="text-muted">Something else</span>-->
+                <!--</div>-->
+                <!--<div class="col-xs-6 col-sm-3 placeholder">-->
+                    <!--<img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail" />-->
+                    <!--<h4>Label</h4>-->
+                    <!--<span class="text-muted">Something else</span>-->
+                <!--</div>-->
+                <!--<div class="col-xs-6 col-sm-3 placeholder">-->
+                    <!--<img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail" />-->
+                    <!--<h4>Label</h4>-->
+                    <!--<span class="text-muted">Something else</span>-->
+                <!--</div>-->
+                <!--<div class="col-xs-6 col-sm-3 placeholder">-->
+                    <!--<img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail" />-->
+                    <!--<h4>Label</h4>-->
+                    <!--<span class="text-muted">Something else</span>-->
+                <!--</div>-->
+            <!--</div>-->
+
+            <h2 class="sub-header">存储空间<button class="btn btn-default" style="margin-left: 15px;" data-toggle="modal" data-target="#addBucket">添加</button></h2>
+            <!-- Modal -->
+            <div class="modal fade" id="addBucket" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content" style="width: 400px;">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="addBucketLabel">添加存储空间</h4>
+                        </div>
+                        <div class="modal-body" style="text-align:  center;">
+                            <form>
+                                <div id="bucketNameDiv">
+                                    <label for="bucketName">名称</label>
+                                    <input type="text" class="form-control" id="bucketName" placeholder="名称" style="width: auto;display: inline;margin-left: 15px;"/>
+                                </div>
+                                <div style="margin-top: 20px;margin-left: -25px;">
+                                    <label>公开性</label>
+                                    <label class="radio-inline" style="margin-left:  10px;">
+                                        <input type="radio" checked="checked" name="addBucketPublic" id="inlineRadio1" value="1" /> 公开读
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" name="addBucketPublic" id="inlineRadio2" value="0" /> 私有读
+                                    </label>
+                                </div>
+                                <input type="hidden" id="csrf"
+                                        th:name="${_csrf.parameterName}"
+                                        th:value="${_csrf.token}" />
+                            </form>
+                            <label style="color:  red;margin-top:  10px; display:none" id="addBucketError">添加失败，原因可能是有重名的bucket</label>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-primary" onclick="addBucket()">确认</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>名称</th>
+                        <th>公开性</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="bucket : ${buckets}">
+                        <td th:text="${bucket.id}"></td>
+                        <td><a th:href="@{'/bucket/' + ${bucket.id}}" th:text="${bucket.name}"></a></td>
+                        <td th:text="${bucket.isPublic}==1? 公开读 : 私有读"></td>
+                        <td th:text="${bucket.createTime}"></td>
+                        <td><button class="btn btn-default" data-toggle="modal" data-target="#updateBucket" th:attr="data-id=${bucket.id},data-name=${bucket.name},data-public=${bucket.isPublic}">修改</button><button class="btn btn-default" data-toggle="modal" data-target="#deleteBucket" th:attr="data-id=${bucket.id}">删除</button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="updateBucket" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content" style="width: 400px;">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="updateBucketLabel">修改</h4>
+                        </div>
+                        <div class="modal-body" style="text-align:  center;">
+                            <form>
+                                <div id="newBucketNameDiv">
+                                    <label for="newBucketName">名称</label>
+                                    <input type="text" class="form-control" id="newBucketName" placeholder="名称" style="width: auto;display: inline;margin-left: 15px;"/>
+                                </div>
+                                <div style="margin-top: 20px;margin-left: -25px;">
+                                    <label>公开性</label>
+                                    <label class="radio-inline" style="margin-left:  10px;">
+                                        <input type="radio" name="updateBucketPublic" value="1" /> 公开读
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" name="updateBucketPublic" value="0" /> 私有读
+                                    </label>
+                                </div>
+                                <input type="hidden" id="bucketId" />
+                            </form>
+                            <label style="color:  red;margin-top:  10px; display:none" id="updateBucketError">修改失败，原因可能是有重名的bucket</label>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-primary" onclick="updateBucket()">确认</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="deleteBucket" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content" style="width: 400px;">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="deleteBucketLabel">删除</h4>
+                        </div>
+                        <div class="modal-body">
+                            你确定要删除id为 <label id="deleteBucketId"></label> 的bucket的吗？这将删除该bucket下的所有文件且无法恢复，请谨慎操作!
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-primary" onclick="deleteConfirm()">确认</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div lang="en" th:replace="fragments/footer :: footer"></div>
+<script src="js/index.js"></script>
 </body>
 </html>

@@ -3,8 +3,10 @@ package com.simu.controller;
 import com.simu.dto.SimpleResponse;
 import com.simu.service.IFileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -70,6 +72,22 @@ public class FileManageController {
     public SimpleResponse rmFolders(@RequestParam(value = "ids")Long[] folderIds){
         fileService.rmFolders(folderIds);
         return SimpleResponse.ok(1);
+    }
+
+    @RequestMapping(value = "/download", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<byte[]> download(@RequestParam(value = "Path") String path,
+                                           @RequestParam(value = "Bucket") String bucket) throws Exception{
+        return fileService.getFile(path, bucket);
+    }
+
+    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    @ResponseBody
+    public SimpleResponse uploadFile(@RequestParam(value = "Path") String path,
+                                     @RequestParam(value = "Bucket") String bucket,
+                                     @RequestParam(value = "File")MultipartFile file) throws Exception{
+        fileService.putFile(file,path,bucket);
+        return SimpleResponse.ok(null);
     }
 
 

@@ -15,7 +15,7 @@ import java.util.Map;
  **/
 public interface IFileService {
     /**
-     * 获取文件流
+     * 获取文件流(用户版需认证)
      * @param path
      * @param bucket
      * @param accessId
@@ -26,7 +26,16 @@ public interface IFileService {
     ResponseEntity getFile(String path, String bucket, String accessId, Long expires, String signature) throws Exception;
 
     /**
-     * 上传文件流
+     *
+     * @param path
+     * @param bucket
+     * @return
+     * @throws Exception
+     */
+    ResponseEntity getFile(String path,String bucket) throws Exception;
+
+    /**
+     * 上传文件流(用户版需认证)
      * @param file
      * @param path affair/112/sjdhJsdf/hello.txt
      * @param bucket
@@ -36,6 +45,15 @@ public interface IFileService {
      * @throws Exception
      */
     void putFile(MultipartFile file, String path, String bucket, String accessId, Long expires, String signature) throws Exception;
+
+    /**
+     *
+     * @param file
+     * @param path
+     * @param bucket
+     * @return
+     */
+    void putFile(MultipartFile file,String path,String bucket) throws Exception;
 
     /**
      * 返回最下层的folderId

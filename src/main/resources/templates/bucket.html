@@ -1,10 +1,240 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head lang="en" th:include="fragments/header :: header">
+
+    <style id="customCss" type="text/css">
+      @import "/css/dashboard.css"
+    </style>
+    <title id="pageTitle">存储空间</title>
 </head>
+
 <body>
-$END$
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">思目文件管理系统</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <!--<li><a href="#">Dashboard</a></li>-->
+                <!--<li><a href="#">Settings</a></li>-->
+                <!--<li><a href="#">Profile</a></li>-->
+                <li><form th:action="@{/logout}" method="post" class="navbar-form">
+                    <input class="btn btn-default" type="submit" value="注销" />
+                </form></li>
+            </ul>
+            <form class="navbar-form navbar-right">
+                <input type="text" class="form-control" placeholder="搜索..." />
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li class="active"><a href="/index">文件管理 <span class="sr-only">(current)</span></a></li>
+                <li><a href="#">系统管理</a></li>
+                <li><a href="#">更多功能</a></li>
+            </ul>
+            <!--<ul class="nav nav-sidebar">-->
+                <!--<li><a href="">Nav item again</a></li>-->
+                <!--<li><a href="">One more nav</a></li>-->
+                <!--<li><a href="">Another nav item</a></li>-->
+                <!--<li><a href="">More navigation</a></li>-->
+            <!--</ul>-->
+            <!--<ul class="nav nav-sidebar">-->
+                <!--<li><a href="">Nav item again</a></li>-->
+                <!--<li><a href="">One more nav</a></li>-->
+                <!--<li><a href="">Another nav item</a></li>-->
+            <!--</ul>-->
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <!--<h1 class="page-header">文件管理</h1>-->
+
+            <!--<div class="row placeholders">-->
+            <!--<div class="col-xs-6 col-sm-3 placeholder">-->
+            <!--<img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail" />-->
+            <!--<h4>Label</h4>-->
+            <!--<span class="text-muted">Something else</span>-->
+            <!--</div>-->
+            <!--<div class="col-xs-6 col-sm-3 placeholder">-->
+            <!--<img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail" />-->
+            <!--<h4>Label</h4>-->
+            <!--<span class="text-muted">Something else</span>-->
+            <!--</div>-->
+            <!--<div class="col-xs-6 col-sm-3 placeholder">-->
+            <!--<img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail" />-->
+            <!--<h4>Label</h4>-->
+            <!--<span class="text-muted">Something else</span>-->
+            <!--</div>-->
+            <!--<div class="col-xs-6 col-sm-3 placeholder">-->
+            <!--<img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail" />-->
+            <!--<h4>Label</h4>-->
+            <!--<span class="text-muted">Something else</span>-->
+            <!--</div>-->
+            <!--</div>-->
+
+            <h2 class="sub-header" th:text="${bucket.name}"></h2>
+
+            <div class="row" style="margin-left:1px">
+                <ol class="col-md-11 breadcrumb">
+                    <li th:each="path,iterator: ${paths}" th:with="condition=${urls[iterator.index]==null}" th:class="${condition}?active:null">
+                        <span th:if="${condition}" th:text="${path}"></span>
+                        <a th:unless="${condition}" th:text="${path}" th:href="${urls[iterator.index]}"></a>
+                    </li>
+                    <!--<li><a href="#">Home</a></li>-->
+                    <!--<li><a href="#">Library</a></li>-->
+                    <!--<li class="active">Data</li>-->
+                </ol>
+                <div class="col-md-1 input-group">
+                    <input type="hidden" id="id" th:value="${id}"/>
+                    <input type="hidden" id="path" th:value="${path}"/>
+                    <input type="text" class="form-control" placeholder="输入前缀匹配" th:value="${keyword}" id="keyword"/>
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" onclick="search()"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                    </span>
+                </div><!-- /input-group -->
+            </div><!-- /.col-lg-6 -->
+            <div>
+                <button type="button" class="btn btn-primary active" data-toggle="modal" data-target="#addFolder">新建目录</button>
+                <button type="button" class="btn btn-default active" data-toggle="modal" data-target="#uploadFile">上传文件</button>
+                <!--<button type="button" class="btn btn-default active">批量删除</button>-->
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="addFolder" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content" style="width: 400px;">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="addFolderLabel">新建目录</h4>
+                        </div>
+                        <div class="modal-body" style="text-align:  center;">
+                            <form>
+                                <div id="folderNameDiv">
+                                    <label for="folderName">名称</label>
+                                    <input type="text" class="form-control" id="folderName" placeholder="名称" style="width: auto;display: inline;margin-left: 15px;"/>
+                                </div>
+                                <input type="hidden" id="bucketId" th:value="${bucket.id}"/>
+                            </form>
+                            <label style="color:  red;margin-top:  10px; display:none" id="addFolderError">添加失败，原因可能是有重名的文件</label>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-primary" onclick="addFolder()">确认</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="uploadFile" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content" style="width: 400px;">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="updateBucketLabel">上传文件</h4>
+                        </div>
+                        <div class="modal-body" style="text-align:  center;">
+                            <form>
+                                <input type="hidden" id="bucketName" th:value="${bucket.name}"/>
+                                <input type="hidden" id="path" th:value="${path}"/>
+                                <input type="file" id="file" />
+                                <!--<div class="form-group">-->
+                                    <!--<label for="exampleInputFile">File input</label>-->
+
+                                    <!--<p class="help-block">Example block-level help text here.</p>-->
+                                <!--</div>-->
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-primary" onclick="uploadFile()">确认</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>文件名</th>
+                        <th>文件标识</th>
+                        <th>文件大小</th>
+                        <th>更新时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="folder : ${folders}">
+                        <td th:text="${folder.id}"></td>
+                        <td><a th:href="@{'/bucket/' + ${bucket.id}+'?path='+${path}+${folder.name}+'/'}" th:text="${folder.name}"></a></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td><button class="btn btn-default" data-toggle="modal" data-target="#deleteFolder" th:attr="data-id=${folder.id}">删除</button></td>
+                    </tr>
+                    <tr th:each="file : ${files}">
+                        <td th:text="${file.id}"></td>
+                        <td th:text="${file.name}"></td>
+                        <td th:text="${file.number}"></td>
+                        <td th:text="${file.size}"></td>
+                        <td th:text="${file.modifyTime}"></td>
+                        <td><a class="btn btn-default" th:href="@{'/file-manage/download?Path='+${file.downloadPath}+'&amp;Bucket='+${bucket.name}}" role="button">下载</a><button class="btn btn-default" data-toggle="modal" data-target="#deleteFile" th:attr="data-id=${file.id}">删除</button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="deleteFile" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content" style="width: 400px;">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="deleteBucketLabel">删除</h4>
+                        </div>
+                        <div class="modal-body">
+                            你确定要删除id为 <label id="deleteFileId"></label> 的文件 ,该操作无法恢复,请谨慎操作!
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-primary" onclick="deleteFileConfirm()">确认</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="deleteFolder" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content" style="width: 400px;">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="deleteFolderLabel">删除</h4>
+                        </div>
+                        <div class="modal-body">
+                            你确定要删除id为 <label id="deleteFolderId"></label> 的文件夹 ,该操作将删除该文件夹及文件夹下的所有文件且无法恢复,请谨慎操作!
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-primary" onclick="deleteFolderConfirm()">确认</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div lang="en" th:replace="/fragments/footer :: footer"></div>
+<script src="/js/index.js"></script>
 </body>
 </html>

@@ -1,21 +1,35 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
-<head>
-    <title>Spring Security Example </title>
-</head>
-<body>
-<div th:if="${param.error}">
-    用户名或密码错
-</div>
-<div th:if="${param.logout}">
-    您已注销成功
-</div>
-<form th:action="@{/login}" method="post">
-    <div><label> 用户名 : <input type="text" name="username"/> </label></div>
-    <div><label> 密  码 : <input type="password" name="password"/> </label></div>
-    <div><input type="submit" value="登录"/></div>
-</form>
-</body>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+  <head lang="en" th:include="fragments/header :: header">
+    <style id="customCss" type="text/css">
+      @import "css/signin.css"
+    </style>
+    <title id="pageTitle">登录</title>
+  </head>
+  <body>
+
+    <div class="container">
+
+      <form class="form-signin" th:action="@{/login}" method="post">
+        <h2 class="form-signin-heading" style="text-align: center">思目文件管理系统</h2>
+        <label for="inputEmail" class="sr-only">用户名</label>
+        <input type="text" id="inputEmail" class="form-control" placeholder="用户名" name="username" required="required" autofocus="autofocus" />
+        <label for="inputPassword" class="sr-only">密码</label>
+        <input type="password" id="inputPassword" class="form-control" placeholder="密码" name="password" required="required" />
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" value="remember-me" /> 记住我
+          </label>
+        </div>
+        <div th:if="${param.error}" style="color:red">
+          用户名或密码不正确，请重新输入。
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">登录</button>
+      </form>
+
+    </div> <!-- /container -->
+
+
+    <div lang="en" th:replace="fragments/footer :: footer"></div>
+  </body>
 </html>

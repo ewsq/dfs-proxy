@@ -61,22 +61,29 @@ public class FileService implements IFileService {
     @Override
     public ResponseEntity getFile(String path, String bucket, String accessId, Long expires, String signature) throws Exception {
         Bucket buck = bucketDao.getBucketByName(bucket);
+        if (buck.getIsPublic() == 0) {
+            // 私密
+            String resource = "/" + bucket + "/" + path;
+            authDao.validSignature(resource, accessId, expires, signature, RequestMethod.GET);
+        }
+        return getFile(path, bucket);
+    }
+
+    @Override
+    public ResponseEntity getFile(String path, String bucket) throws Exception {
+        Bucket buck = bucketDao.getBucketByName(bucket);
         if (null == buck) {
             throw new ErrorCodeException(ResponseCodeEnum.BUCKET_NOT_EXIST);
         }
         String fileName = FileUtil.getSimpleFileName(path);
         String purePath = FileUtil.getPurePath(path);
         File fileEntity = fileDao.getFileByPath(buck.getId(), purePath, fileName);
-        if (null == fileEntity){
+        if (null == fileEntity) {
             throw new ErrorCodeException(ResponseCodeEnum.FILE_NOT_EXIST);
         }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        if (buck.getIsPublic() == 0) {
-            // 私密
-            String resource = "/" + bucket + "/" + path;
-            authDao.validSignature(resource, accessId, expires, signature, RequestMethod.GET);
-        }
+
         headers.setContentDispositionFormData("attachment", fileEntity.getName());
         ByteArrayOutputStream byteArrayOutputStream = (ByteArrayOutputStream) fileTemplate.getFileStream(fileEntity.getNumber()).getOutputStream();
         return new ResponseEntity<>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.CREATED);
@@ -84,8 +91,13 @@ public class FileService implements IFileService {
 
     @Override
     public void putFile(MultipartFile file, String path, String bucket, String accessId, Long expires, String signature) throws Exception {
-//        String resource = "/" + bucket + "/" + path;
-//        authDao.validSignature(resource, accessId, expires, signature, RequestMethod.POST);
+        String resource = "/" + bucket + "/" + path;
+        authDao.validSignature(resource, accessId, expires, signature, RequestMethod.POST);
+        putFile(file, path, bucket);
+    }
+
+    @Override
+    public void putFile(MultipartFile file, String path, String bucket) throws Exception {
         Bucket buck = bucketDao.getBucketByName(bucket);
         if (null == buck) {
             throw new ErrorCodeException(ResponseCodeEnum.BUCKET_NOT_EXIST);
@@ -112,19 +124,19 @@ public class FileService implements IFileService {
     }
 
     public long createFolders(String purePath, long bucketId) {
-        purePath = purePath.replace(" ","");
-        if ("".equals(purePath)){
-            throw new ErrorCodeException(ResponseCodeEnum.BAD_REQUEST_PARAM.getCode(),ResponseCodeEnum.BAD_REQUEST_PARAM.getMsg()+":path");
+        purePath = purePath.replace(" ", "");
+        if ("".equals(purePath)) {
+            throw new ErrorCodeException(ResponseCodeEnum.BAD_REQUEST_PARAM.getCode(), ResponseCodeEnum.BAD_REQUEST_PARAM.getMsg() + ":path");
         }
-        if (bucketDao.findById(bucketId) == null){
+        if (bucketDao.findById(bucketId) == null) {
             throw new ErrorCodeException(ResponseCodeEnum.BUCKET_NOT_EXIST);
         }
         String[] folders = purePath.split("/");
         String parentPath = "";
         long parentId = 0;
         for (int i = 0; i < folders.length; i++) {
-            if ("".equals(folders[i])){
-                throw new ErrorCodeException(ResponseCodeEnum.BAD_REQUEST_PARAM.getCode(),ResponseCodeEnum.BAD_REQUEST_PARAM.getMsg()+":path");
+            if ("".equals(folders[i])) {
+                throw new ErrorCodeException(ResponseCodeEnum.BAD_REQUEST_PARAM.getCode(), ResponseCodeEnum.BAD_REQUEST_PARAM.getMsg() + ":path");
             }
             Folder folder = folderDao.getFolderByPath(bucketId, parentPath, folders[i]);
             if (null == folder) {
@@ -132,9 +144,9 @@ public class FileService implements IFileService {
                 folder.save();
             }
             parentId = folder.getId();
-            if ("".equals(parentPath)){
+            if ("".equals(parentPath)) {
                 parentPath = folder.getName();
-            }else{
+            } else {
                 parentPath += "/" + folder.getName();
             }
         }
@@ -142,7 +154,7 @@ public class FileService implements IFileService {
     }
 
     @Override
-    public void deleteFilesByBucketId(long bucketId){
+    public void deleteFilesByBucketId(long bucketId) {
         List<File> files = fileDao.getFilesByBucketId(bucketId);
         files.stream().forEach(file -> {
             safeDeleteFile(file.getNumber());
@@ -151,29 +163,29 @@ public class FileService implements IFileService {
     }
 
     @Override
-    public Map<String,List> getFileAndFoldersByPath(long bucketId, String path, String keyword) {
+    public Map<String, List> getFileAndFoldersByPath(long bucketId, String path, String keyword) {
         List<SimpleFolderVO> simpleFolderVOS = new ArrayList<>();
         List<SimpleFileVO> simpleFileVOS = new ArrayList<>();
-        if (null == path){
+        if (null == path) {
             path = "";
-        }else {
-            path = path.substring(0,path.length()-1);
+        } else {
+            path = path.substring(0, path.length() - 1);
         }
         List<Folder> folders = folderDao.getFoldersByPath(bucketId, path, keyword);
         simpleFolderVOS.addAll(folders.stream().map(a -> new SimpleFolderVO(a)).collect(Collectors.toList()));
         List<File> files = fileDao.getFilesByPath(bucketId, path, keyword);
         simpleFileVOS.addAll(files.stream().map(a -> new SimpleFileVO(a)).collect(Collectors.toList()));
-        Map<String,List> res = new HashMap<>();
-        res.put("folders",simpleFolderVOS);
-        res.put("files",simpleFileVOS);
+        Map<String, List> res = new HashMap<>();
+        res.put("folders", simpleFolderVOS);
+        res.put("files", simpleFileVOS);
         return res;
     }
 
     @Override
     public void rmFiles(Long[] fileIds) {
-        for (Long id:fileIds){
+        for (Long id : fileIds) {
             File file = fileDao.deleteFile(id);
-            if (null != file){
+            if (null != file) {
                 safeDeleteFile(file.getNumber());
             }
         }
@@ -182,10 +194,11 @@ public class FileService implements IFileService {
     @Override
     public void rmFolders(Long[] folderIds) {
         // 直接使用like无需递归
-        for (Long id: folderIds){
+        for (Long id : folderIds) {
             Folder folder = folderDao.findById(id);
-            if (null != folder){
-                String pathPrefix = folder.getPath()+"/"+folder.getName();
+            if (null != folder) {
+                String path = folder.getPath().equals("") ? "" : folder.getPath() + "/";
+                String pathPrefix = path + folder.getName();
                 List<File> files = fileDao.getFilesInPath(folder.getBucketId(), pathPrefix);
                 files.stream().forEach(file -> {
                     safeDeleteFile(file.getNumber());
@@ -200,9 +213,10 @@ public class FileService implements IFileService {
 
     /**
      * delete file without throw IOException
+     *
      * @param fileNumber
      */
-    private void safeDeleteFile(String fileNumber){
+    private void safeDeleteFile(String fileNumber) {
         try {
             fileTemplate.deleteFile(fileNumber);
         } catch (IOException e) {
