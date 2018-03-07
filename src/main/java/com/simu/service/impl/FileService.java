@@ -83,8 +83,8 @@ public class FileService implements IFileService {
         }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-
-        headers.setContentDispositionFormData("attachment", fileEntity.getName());
+        String downloadFileName = new String(fileEntity.getName().getBytes("UTF-8"),"iso-8859-1");
+        headers.setContentDispositionFormData("attachment", downloadFileName);
         ByteArrayOutputStream byteArrayOutputStream = (ByteArrayOutputStream) fileTemplate.getFileStream(fileEntity.getNumber()).getOutputStream();
         return new ResponseEntity<>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.CREATED);
     }
