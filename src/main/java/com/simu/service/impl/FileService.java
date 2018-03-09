@@ -1,22 +1,27 @@
 package com.simu.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.simu.constant.FileState;
 import com.simu.constant.ResponseCodeEnum;
-import com.simu.dao.IAuthDao;
-import com.simu.dao.IBucketDao;
-import com.simu.dao.IFileDao;
-import com.simu.dao.IFolderDao;
+import com.simu.dao.*;
 import com.simu.exception.ErrorCodeException;
 import com.simu.model.Bucket;
 import com.simu.model.File;
+import com.simu.model.FileChunk;
 import com.simu.model.Folder;
 import com.simu.seaweedfs.core.FileSource;
 import com.simu.seaweedfs.core.FileTemplate;
+import com.simu.seaweedfs.core.contect.AssignFileKeyResult;
+import com.simu.seaweedfs.core.file.ChunkInfo;
+import com.simu.seaweedfs.core.file.ChunkManifest;
 import com.simu.seaweedfs.core.file.FileHandleStatus;
 import com.simu.service.IFileService;
 import com.simu.utils.FileUtil;
 import com.simu.utils.TimeUtil;
+import com.simu.vo.MultipartUploadInitResult;
 import com.simu.vo.SimpleFileVO;
 import com.simu.vo.SimpleFolderVO;
+import org.apache.http.entity.FileEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -54,6 +60,9 @@ public class FileService implements IFileService {
 
     @Autowired
     IFolderDao folderDao;
+
+    @Autowired
+    IFileChunkDao fileChunkDao;
 
     @Autowired
     FileTemplate fileTemplate;
@@ -121,6 +130,79 @@ public class FileService implements IFileService {
             fileEntity.setFolderId(createFolders(purePath, buck.getId()));
             fileEntity.save();
         }
+    }
+
+    @Override
+    public void putFileChunk(MultipartFile file, String path, String bucket, long fileId, long offset, long size, String accessId, Long expires, String signature) throws Exception{
+        String resource = "/" + bucket + "/" + path;
+        authDao.validSignature(resource, accessId, expires, signature, RequestMethod.POST);
+        FileHandleStatus fileHandleStatus = fileTemplate.saveFileByStream(fileId+"-offset-"+offset, file.getInputStream(), bucket);
+        FileChunk fileChunk = new FileChunk(fileHandleStatus.getFileId(), fileId, offset, size);
+        fileChunk.save();
+    }
+
+    @Override
+    public MultipartUploadInitResult initMultipartUpload(long size, String path, String bucket, String accessId, Long expires, String signature) throws Exception {
+        Bucket buck = bucketDao.getBucketByName(bucket);
+        if (null == buck){
+            throw new ErrorCodeException(ResponseCodeEnum.BUCKET_NOT_EXIST);
+        }
+        String fileName = FileUtil.getSimpleFileName(path);
+        String purePath = FileUtil.getPurePath(path);
+        File fileEntity = fileDao.getFileByPath(buck.getId(), purePath, fileName);
+        MultipartUploadInitResult multipartUploadInitResult = new MultipartUploadInitResult();
+        if (null != fileEntity){
+            //1. 原文件上传成功-删除原文件返回文件id 2.原文件正在上传，返回已上传的分片列表
+            if (fileEntity.getState() == FileState.LARGE_FILE_UPLOADED.getState() || fileEntity.getState() == FileState.DEFAULT.getState()){
+                fileTemplate.deleteFile(fileEntity.getNumber());// 会自动删除分片
+                fileChunkDao.deleteChunksByFileId(fileEntity.getId());
+                AssignFileKeyResult assignFileKeyResult = fileTemplate.assignFileKeyResult();
+                fileEntity.setState(FileState.LARGE_FILE_UPLOADING.getState());
+                fileEntity.setNumber(assignFileKeyResult.getFid());
+                fileEntity.setModifyTime(TimeUtil.getCurrentSqlTime());
+                fileEntity.setSize(size);
+                fileEntity.update();
+            }else{
+                List<FileChunk> fileChunks = fileChunkDao.getFileChunksByFileId(fileEntity.getId());
+                multipartUploadInitResult.setUploadedChunks(fileChunks);
+            }
+        }else{
+//            AssignFileKeyResult assignFileKeyResult = fileTemplate.assignFileKeyResult();
+            fileEntity = new File(fileName, "", purePath, size, buck.getId());
+            fileEntity.setFolderId(createFolders(purePath, buck.getId()));
+            fileEntity.setState(FileState.LARGE_FILE_UPLOADING.getState());
+            fileEntity.save();
+        }
+        multipartUploadInitResult.setFileId(fileEntity.getId());
+        return multipartUploadInitResult;
+    }
+
+    @Override
+    public void completeMultipartUpload(long fileId, String accessId, Long expires, String signature) throws Exception{
+        File file = fileDao.findById(fileId);
+        if (null == file){
+            throw new ErrorCodeException(ResponseCodeEnum.FILE_NOT_EXIST);
+        }
+        List<FileChunk> fileChunks = fileChunkDao.getFileChunksByFileId(fileId);
+        String mime = new MimetypesFileTypeMap().getContentType(file.getName());
+        ChunkManifest chunkManifest = new ChunkManifest();
+        chunkManifest.setName(file.getName());
+        chunkManifest.setSize(file.getSize());
+        chunkManifest.setMime(mime);
+        List<ChunkInfo> chunkInfos = fileChunks.stream().map(fileChunk -> {
+            ChunkInfo chunkInfo = new ChunkInfo();
+            chunkInfo.setFid(fileChunk.getNumber());
+            chunkInfo.setOffset(fileChunk.getOffset());
+            chunkInfo.setSize(fileChunk.getSize());
+            return chunkInfo;
+        }).collect(Collectors.toList());
+        chunkManifest.setChunks(chunkInfos);
+        String chunkManifestStr = JSON.toJSONString(chunkManifest);
+        FileHandleStatus fileHandleStatus = fileTemplate.saveFileByString(file.getName(), chunkManifestStr);
+        file.setModifyTime(TimeUtil.getCurrentSqlTime());
+        file.setNumber(fileHandleStatus.getFileId());
+        file.setState(FileState.LARGE_FILE_UPLOADED.getState());
+        file.update();
     }
 
     public long createFolders(String purePath, long bucketId) {

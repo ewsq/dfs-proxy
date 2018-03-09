@@ -12,7 +12,7 @@ public class SimpleFileVO{
     private long id;
     private String name;
     private Timestamp modifyTime;
-    private double size;
+    private long size;
     private String number;
     private String downloadPath;
 
@@ -59,11 +59,11 @@ public class SimpleFileVO{
         this.modifyTime = modifyTime;
     }
 
-    public double getSize() {
+    public long getSize() {
         return size;
     }
 
-    public void setSize(double size) {
+    public void setSize(long size) {
         this.size = size;
     }
 

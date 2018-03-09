@@ -20,9 +20,10 @@ public class File extends ExecutableModel {
     private String name;
     private String number;//weed中的文件id
     private String path;// 路径：null(根路径)  或者 a/b/c
-    private double size;// Byte, 存储在 weed 中的大小 可能会被压缩
+    private long size;// Byte, 存储在 weed 中的大小 可能会被压缩
     private long folderId;
     private long bucketId;
+    private int state;// 状态, 0:默认, 1:大文件正在上传，2：大文件上传成功
     private Timestamp createTime;
     private Timestamp modifyTime = TimeUtil.getCurrentSqlTime();
 
@@ -36,7 +37,7 @@ public class File extends ExecutableModel {
      * @param size
      * @param bucketId
      */
-    public File(String name, String number, String path, double size, long bucketId) {
+    public File(String name, String number, String path, long size, long bucketId) {
         this.name = name;
         this.number = number;
         this.path = path;
@@ -68,16 +69,24 @@ public class File extends ExecutableModel {
         this.number = number;
     }
 
-    public double getSize() {
+    public long getSize() {
         return size;
     }
 
-    public void setSize(double size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
     public long getFolderId() {
         return folderId;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
     }
 
     public void setFolderId(long folderId) {

@@ -48,4 +48,11 @@ public interface IFileDao {
      * @return
      */
     List<File> getFilesInPath(long bucketId, String pathPrefix);
+
+    /**
+     *
+     * @param id
+     * @return
+     */
+    File findById(long id);
 }

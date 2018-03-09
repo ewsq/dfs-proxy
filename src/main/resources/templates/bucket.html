@@ -97,7 +97,7 @@
                 </ol>
                 <div class="col-md-1 input-group">
                     <input type="hidden" id="id" th:value="${id}"/>
-                    <input type="hidden" id="path" th:value="${path}"/>
+                    <!--<input type="hidden" id="path" th:value="${path}"/>-->
                     <input type="text" class="form-control" placeholder="输入前缀匹配" th:value="${keyword}" id="keyword"/>
                     <span class="input-group-btn">
                         <button class="btn btn-default" type="button" onclick="search()"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
@@ -107,7 +107,7 @@
             <div>
                 <button type="button" class="btn btn-primary active" data-toggle="modal" data-target="#addFolder">新建目录</button>
                 <button type="button" class="btn btn-default active" data-toggle="modal" data-target="#uploadFile">上传文件</button>
-                <!--<button type="button" class="btn btn-default active">批量删除</button>-->
+                <button type="button" class="btn btn-default active" data-toggle="">分片上传(用于测试)</button>
             </div>
             <!-- Modal -->
             <div class="modal fade" id="addFolder" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">

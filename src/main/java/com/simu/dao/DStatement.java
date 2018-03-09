@@ -42,4 +42,8 @@ public class DStatement extends Statement<DStatement> {
         return eq("bucket_id", bucketId);
     }
 
+    public DStatement fileId(long fileId){
+        return eq("file_id", fileId);
+    }
+
 }

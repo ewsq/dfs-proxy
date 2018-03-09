@@ -49,5 +49,10 @@ public class FileDao implements IFileDao {
         return files;
     }
 
+    @Override
+    public File findById(long id) {
+        return DStatement.build(File.class).findById(id);
+    }
+
 
 }

@@ -76,5 +76,53 @@ public class FileController {
         return SimpleResponse.ok(null);
     }
 
+    @RequestMapping(value = "/initMultipartUpload", method = RequestMethod.POST)
+    @ResponseBody
+    public SimpleResponse initMultipartUpload(@RequestParam(value = "Path") String path,
+                                              @RequestParam(value = "Bucket") String bucket,
+                                              @RequestParam(value = "Size") long size,
+                                              @RequestParam(value = "AccessKeyId", required = false) String accessKeyId,
+                                              @RequestParam(value = "Expires", required = false) Long expires,
+                                              @RequestParam(value = "Signature", required = false) String signature,
+                                              @RequestParam(value = "Callback", required = false)String callbackUrl) throws Exception{
+        if (expires == null){
+            expires = 0L;
+        }
+        return SimpleResponse.ok(fileService.initMultipartUpload(size, path, bucket, accessKeyId,expires, signature));
+    }
+
+    @RequestMapping(value = "/uploadPart", method = RequestMethod.POST)
+    @ResponseBody
+    public SimpleResponse uploadPart(@RequestParam(value = "FileId") long fileId,
+                                     @RequestParam(value = "Offset") long offset,
+                                     @RequestParam(value = "Size") long size,
+                                     @RequestParam(value = "Bucket") String bucket,
+                                     @RequestParam(value = "Path") String path,
+                                     @RequestParam(value = "File")MultipartFile file,
+                                     @RequestParam(value = "AccessKeyId", required = false) String accessKeyId,
+                                     @RequestParam(value = "Expires", required = false) Long expires,
+                                     @RequestParam(value = "Signature", required = false) String signature,
+                                     @RequestParam(value = "Callback", required = false)String callbackUrl)throws Exception{
+        if (expires == null){
+            expires = 0L;
+        }
+        fileService.putFileChunk(file, path, bucket, fileId, offset, size, accessKeyId, expires, signature);
+        return SimpleResponse.ok(null);
+    }
+
+    @RequestMapping(value = "/completeMultipartUpload", method = RequestMethod.POST)
+    @ResponseBody
+    public SimpleResponse completeMultipartUpload(@RequestParam(value = "FileId") long fileId,
+                                                  @RequestParam(value = "AccessKeyId", required = false) String accessKeyId,
+                                                  @RequestParam(value = "Expires", required = false) Long expires,
+                                                  @RequestParam(value = "Signature", required = false) String signature,
+                                                  @RequestParam(value = "Callback", required = false)String callbackUrl){
+        if (expires == null){
+            expires = 0L;
+        }
+        return SimpleResponse.ok(null);
+    }
+
+
 
 }

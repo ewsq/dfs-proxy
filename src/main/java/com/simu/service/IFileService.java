@@ -1,5 +1,7 @@
 package com.simu.service;
 
+import com.simu.model.FileChunk;
+import com.simu.vo.MultipartUploadInitResult;
 import com.simu.vo.SimpleFileVO;
 import com.simu.vo.SimpleFolderVO;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +56,40 @@ public interface IFileService {
      * @return
      */
     void putFile(MultipartFile file,String path,String bucket) throws Exception;
+
+    /**
+     * 上传分片小文件(每个分片上传都需要验证)
+     * 碎片清理：1. 主动 2. 定时清理
+     * @param bucket
+     * @param file
+     * @param fileId
+     * @param offset
+     * @param size
+     */
+    void putFileChunk(MultipartFile file, String path, String bucket, long fileId, long offset, long size, String accessKeyId, Long expires, String signature) throws Exception;
+
+    /**
+     * 初始化大文件上传(用户版需认证)
+     * 1. 正在上传的同名文件，直接返回已上传成功的分片列表
+     * 2. 上传完成的同名文件直接删除文件和分片（测试是否能自动删除分片）
+     * @param size
+     * @param path
+     * @param bucket
+     * @param accessId
+     * @param expires
+     * @param signature
+     * @return
+     */
+    MultipartUploadInitResult initMultipartUpload(long size, String path, String bucket, String accessId, Long expires, String signature) throws Exception;
+
+    /**
+     * 完成大文件上传(用户版需认证)
+     * @param fileId
+     * @param accessId
+     * @param expires
+     * @param signature
+     */
+    void completeMultipartUpload(long fileId, String accessId, Long expires, String signature) throws Exception;
 
     /**
      * 返回最下层的folderId
