@@ -28,7 +28,7 @@ public class FileDao implements IFileDao {
 
     @Override
     public File deleteFile(long id) {
-        DStatement.build(FileChunk.class).fileId(id).remove();
+//        DStatement.build(FileChunk.class).fileId(id).remove();
         File file = DStatement.build(File.class).id(id).selectOne();
         file.delete();
         return file;
@@ -40,7 +40,7 @@ public class FileDao implements IFileDao {
         if (null != keyword){
             dStatement = dStatement.like("name",keyword+"%");
         }
-        return dStatement.uploadedState().selectList();
+        return dStatement.selectList();
     }
 
     @Override

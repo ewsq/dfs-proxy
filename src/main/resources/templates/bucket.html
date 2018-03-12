@@ -189,7 +189,8 @@
                         <td th:text="${file.number}"></td>
                         <td th:text="${file.size}"></td>
                         <td th:text="${file.modifyTime}"></td>
-                        <td><a class="btn btn-default" th:href="@{'/file-manage/download?Path='+${file.downloadPath}+'&amp;Bucket='+${bucket.name}}" role="button">下载</a><button class="btn btn-default" data-toggle="modal" data-target="#deleteFile" th:attr="data-id=${file.id}">删除</button></td>
+                        <td><a class="btn btn-default" th:href="@{'/file-manage/download?Path='+${file.downloadPath}+'&amp;Bucket='+${bucket.name}}" role="button">下载</a>
+                            <button class="btn btn-default" data-toggle="modal" data-target="#deleteFile" th:attr="data-id=${file.id}" th:text="${file.number}==''? 碎片清理 : 删除"></button></td>
                     </tr>
                     </tbody>
                 </table>

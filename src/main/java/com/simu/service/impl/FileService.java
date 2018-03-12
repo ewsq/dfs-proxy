@@ -287,9 +287,16 @@ public class FileService implements IFileService {
     public void rmFiles(Long[] fileIds) {
         for (Long id : fileIds) {
             File file = fileDao.deleteFile(id);
-
             if (null != file) {
-                safeDeleteFile(file.getNumber());
+                if (file.getState() == FileState.LARGE_FILE_UPLOADING.getState()){
+                    List<FileChunk> fileChunks = fileChunkDao.getFileChunksByFileId(id);
+                    fileChunks.forEach(fileChunk -> safeDeleteFile(fileChunk.getNumber()));
+                    //先将实际的碎片清理再删库
+                    fileChunkDao.deleteChunksByFileId(id);
+                }else{
+                    fileChunkDao.deleteChunksByFileId(id);
+                    safeDeleteFile(file.getNumber());
+                }
             }
         }
     }
