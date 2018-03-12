@@ -249,18 +249,139 @@ function deleteFileConfirm(){
 }
 
 function uploadFile(){
+    $('#uploadFileBtn').attr('disabled','disabled');
     var formData = new FormData();
-    formData.append('File', $('#file')[0].files[0]);
-    formData.append('Bucket', $('#bucketName').val());
-    formData.append('Path',$('#path').val()+$('#file')[0].files[0].name);
-    $.ajax({
-        url: '/file-manage/upload',
-        type: 'POST',
-        cache: false,
-        data: formData,
-        processData: false,
-        contentType: false
-    }).done(function(res) {
-        location.reload();
-    }).fail(function(res) {});
+    var f = $('#file')[0].files[0];
+//    alert(f.size);
+    // 超过50M分片
+    if(f.size < 50 * 1024 * 1024){
+        formData.append('File', f);
+        formData.append('Bucket', $('#bucketName').val());
+        formData.append('Path',$('#path').val()+$('#file')[0].files[0].name);
+        upload(formData).then((res) => {
+            console.log(res)
+            location.reload()
+        })
+    }else{
+        //超过100M 进行文件分片传输，默认50M一个分片
+        formData.append('Bucket', $('#bucketName').val());
+        formData.append('Path', $('#path').val()+$('#file')[0].files[0].name);
+        formData.append('Size', f.size);
+        initMultipartUpload(formData).then((res) => {
+//            console.log(res);
+            return res;
+        }).then((res) => {
+//            console.log(res.data)
+//            Promise.all([upload1(1), upload2(2)]).then(res => {
+//
+//            })
+            if(res.code != 0){
+                alert(res.data);
+            }else{
+                var data = res.data;
+                var uploadedChunkOffsets = new Array(data.uploadedChunks.length);
+                for(j = 0,len=data.uploadedChunks.length; j < len; j++) {
+                    uploadedChunkOffsets.push(data.uploadedChunks[j]);
+                }
+                //分割文件，再上传没有上传的分片
+                var uploadPartFuncs = [];
+                var start = 0;
+                var maxSize = 50 * 1024 * 1024;
+                while(start < f.size){
+                    var end = (start + maxSize) > f.size?f.size:(start+maxSize);
+                    var filePart = f.slice(start, end);
+                    if(uploadedChunkOffsets.indexOf(start) == -1){
+                        var partFormData = new FormData();
+                        partFormData.append('Bucket', $('#bucketName').val());
+                        partFormData.append('Path', $('#path').val()+$('#file')[0].files[0].name);
+                        partFormData.append('FileId',data.fileId);
+                        partFormData.append('Offset',start);
+                        partFormData.append('Size', end - start);
+                        partFormData.append('File', filePart);
+                        uploadPartFuncs.push(uploadPart(partFormData));
+                    }
+                    start = end;
+                }
+                Promise.all(uploadPartFuncs).then(res => {
+                    console.log(res)
+                    formData.append('FileId',data.fileId);
+                    completeMultipartUpload(formData).then((r) => {
+                        console.log(r);
+                        location.reload();
+                    })
+                })
+
+            }
+        })
+    }
+}
+
+
+
+function upload(data) {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: '/file-manage/upload',
+            type: 'POST',
+            cache: false,
+            data: data,
+            processData: false,
+            contentType: false
+        }).done(function(res) {
+            resolve(res)
+        }).fail(function(res) {
+            reject(res)
+        });
+    })
+}
+
+function initMultipartUpload(data){
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: '/file-manage/initMultipartUpload',
+            type: 'POST',
+            cache: false,
+            data: data,
+            processData: false,
+            contentType: false
+        }).done(function(res) {
+            resolve(res)
+        }).fail(function(res) {
+            reject(res)
+        });
+    })
+}
+
+function uploadPart(data){
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: '/file-manage/uploadPart',
+            type: 'POST',
+            cache: false,
+            data: data,
+            processData: false,
+            contentType: false
+        }).done(function(res) {
+            resolve(res)
+        }).fail(function(res) {
+            reject(res)
+        });
+    })
+}
+
+function completeMultipartUpload(data){
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: '/file-manage/completeMultipartUpload',
+            type: 'POST',
+            cache: false,
+            data: data,
+            processData: false,
+            contentType: false
+        }).done(function(res) {
+            resolve(res)
+        }).fail(function(res) {
+            reject(res)
+        });
+    })
 }

@@ -1,5 +1,6 @@
 package com.simu.dao;
 
+import com.simu.constant.FileState;
 import org.exemodel.orm.Statement;
 
 /**
@@ -40,6 +41,10 @@ public class DStatement extends Statement<DStatement> {
 
     public DStatement bucketId(long bucketId){
         return eq("bucket_id", bucketId);
+    }
+
+    public DStatement uploadedState(){
+        return in("state", new Integer[]{FileState.DEFAULT.getState(),FileState.LARGE_FILE_UPLOADED.getState()});
     }
 
     public DStatement fileId(long fileId){

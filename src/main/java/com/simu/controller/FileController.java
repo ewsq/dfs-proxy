@@ -113,13 +113,16 @@ public class FileController {
     @RequestMapping(value = "/completeMultipartUpload", method = RequestMethod.POST)
     @ResponseBody
     public SimpleResponse completeMultipartUpload(@RequestParam(value = "FileId") long fileId,
+                                                  @RequestParam(value = "Bucket")String bucket,
+                                                  @RequestParam(value = "Path")String path,
                                                   @RequestParam(value = "AccessKeyId", required = false) String accessKeyId,
                                                   @RequestParam(value = "Expires", required = false) Long expires,
                                                   @RequestParam(value = "Signature", required = false) String signature,
-                                                  @RequestParam(value = "Callback", required = false)String callbackUrl){
+                                                  @RequestParam(value = "Callback", required = false)String callbackUrl)throws Exception{
         if (expires == null){
             expires = 0L;
         }
+        fileService.completeMultipartUpload(fileId, path, bucket, accessKeyId, expires, signature);
         return SimpleResponse.ok(null);
     }
 

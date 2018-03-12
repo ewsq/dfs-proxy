@@ -136,6 +136,11 @@ public class FileService implements IFileService {
     public void putFileChunk(MultipartFile file, String path, String bucket, long fileId, long offset, long size, String accessId, Long expires, String signature) throws Exception{
         String resource = "/" + bucket + "/" + path;
         authDao.validSignature(resource, accessId, expires, signature, RequestMethod.POST);
+        putFileChunk(file, path, bucket, fileId, offset, size);
+    }
+
+    @Override
+    public void putFileChunk(MultipartFile file, String path, String bucket, long fileId, long offset, long size) throws Exception {
         FileHandleStatus fileHandleStatus = fileTemplate.saveFileByStream(fileId+"-offset-"+offset, file.getInputStream(), bucket);
         FileChunk fileChunk = new FileChunk(fileHandleStatus.getFileId(), fileId, offset, size);
         fileChunk.save();
@@ -143,6 +148,13 @@ public class FileService implements IFileService {
 
     @Override
     public MultipartUploadInitResult initMultipartUpload(long size, String path, String bucket, String accessId, Long expires, String signature) throws Exception {
+        String resource = "/" + bucket + "/" + path;
+        authDao.validSignature(resource, accessId, expires, signature, RequestMethod.POST);
+        return initMultipartUpload(size, path,bucket);
+    }
+
+    @Override
+    public MultipartUploadInitResult initMultipartUpload(long size, String path, String bucket) throws Exception {
         Bucket buck = bucketDao.getBucketByName(bucket);
         if (null == buck){
             throw new ErrorCodeException(ResponseCodeEnum.BUCKET_NOT_EXIST);
@@ -178,7 +190,14 @@ public class FileService implements IFileService {
     }
 
     @Override
-    public void completeMultipartUpload(long fileId, String accessId, Long expires, String signature) throws Exception{
+    public void completeMultipartUpload(long fileId, String path, String bucket, String accessId, Long expires, String signature) throws Exception{
+        String resource = "/" + bucket + "/" + path;
+        authDao.validSignature(resource, accessId, expires, signature, RequestMethod.POST);
+        completeMultipartUpload(fileId, path, bucket);
+    }
+
+    @Override
+    public void completeMultipartUpload(long fileId, String path, String bucket) throws Exception {
         File file = fileDao.findById(fileId);
         if (null == file){
             throw new ErrorCodeException(ResponseCodeEnum.FILE_NOT_EXIST);
@@ -208,7 +227,8 @@ public class FileService implements IFileService {
     public long createFolders(String purePath, long bucketId) {
         purePath = purePath.replace(" ", "");
         if ("".equals(purePath)) {
-            throw new ErrorCodeException(ResponseCodeEnum.BAD_REQUEST_PARAM.getCode(), ResponseCodeEnum.BAD_REQUEST_PARAM.getMsg() + ":path");
+            //根目录不用创建
+            return 0;
         }
         if (bucketDao.findById(bucketId) == null) {
             throw new ErrorCodeException(ResponseCodeEnum.BUCKET_NOT_EXIST);
@@ -267,6 +287,7 @@ public class FileService implements IFileService {
     public void rmFiles(Long[] fileIds) {
         for (Long id : fileIds) {
             File file = fileDao.deleteFile(id);
+
             if (null != file) {
                 safeDeleteFile(file.getNumber());
             }

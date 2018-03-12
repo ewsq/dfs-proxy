@@ -17,6 +17,9 @@ public class FileUtil {
             return "";
         }
         int index = path.lastIndexOf('/');
+        if (index == -1){
+            return path;
+        }
         String fileName = "";
         if (index > 0){
             fileName = path.substring(index+1);

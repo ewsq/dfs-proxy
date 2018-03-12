@@ -3,6 +3,7 @@ package com.simu.dao.impl;
 import com.simu.dao.DStatement;
 import com.simu.dao.IFileDao;
 import com.simu.model.File;
+import com.simu.model.FileChunk;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class FileDao implements IFileDao {
 
     @Override
     public File deleteFile(long id) {
+        DStatement.build(FileChunk.class).fileId(id).remove();
         File file = DStatement.build(File.class).id(id).selectOne();
         file.delete();
         return file;
@@ -38,7 +40,7 @@ public class FileDao implements IFileDao {
         if (null != keyword){
             dStatement = dStatement.like("name",keyword+"%");
         }
-        return dStatement.selectList();
+        return dStatement.uploadedState().selectList();
     }
 
     @Override

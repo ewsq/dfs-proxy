@@ -69,6 +69,19 @@ public interface IFileService {
     void putFileChunk(MultipartFile file, String path, String bucket, long fileId, long offset, long size, String accessKeyId, Long expires, String signature) throws Exception;
 
     /**
+     *
+     * @param file
+     * @param path
+     * @param bucket
+     * @param fileId
+     * @param offset
+     * @param size
+     * @throws Exception
+     */
+    void putFileChunk(MultipartFile file, String path, String bucket, long fileId, long offset, long size) throws Exception;
+
+    /**
+     * 大文件上传的验证超时时间可以设长，所有操作都使用同一个签名，当签名过期时再重新获取
      * 初始化大文件上传(用户版需认证)
      * 1. 正在上传的同名文件，直接返回已上传成功的分片列表
      * 2. 上传完成的同名文件直接删除文件和分片（测试是否能自动删除分片）
@@ -83,13 +96,32 @@ public interface IFileService {
     MultipartUploadInitResult initMultipartUpload(long size, String path, String bucket, String accessId, Long expires, String signature) throws Exception;
 
     /**
+     * 管理员版不需要验证
+     * @param size
+     * @param path
+     * @param bucket
+     * @return
+     * @throws Exception
+     */
+    MultipartUploadInitResult initMultipartUpload(long size, String path, String bucket) throws Exception;
+
+    /**
      * 完成大文件上传(用户版需认证)
      * @param fileId
      * @param accessId
      * @param expires
      * @param signature
      */
-    void completeMultipartUpload(long fileId, String accessId, Long expires, String signature) throws Exception;
+    void completeMultipartUpload(long fileId, String path, String bucket, String accessId, Long expires, String signature) throws Exception;
+
+    /**
+     *
+     * @param fileId
+     * @param path
+     * @param bucket
+     * @throws Exception
+     */
+    void completeMultipartUpload(long fileId, String path, String bucket) throws Exception;
 
     /**
      * 返回最下层的folderId

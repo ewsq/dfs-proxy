@@ -90,5 +90,34 @@ public class FileManageController {
         return SimpleResponse.ok(null);
     }
 
+    @RequestMapping(value = "/initMultipartUpload")
+    @ResponseBody
+    public SimpleResponse initMultipartUpload(@RequestParam(value = "Path") String path,
+                                              @RequestParam(value = "Bucket") String bucket,
+                                              @RequestParam(value = "Size") long size) throws Exception{
+        return SimpleResponse.ok(fileService.initMultipartUpload(size, path, bucket));
+    }
+
+    @RequestMapping(value = "/uploadPart", method = RequestMethod.POST)
+    @ResponseBody
+    public SimpleResponse uploadPart(@RequestParam(value = "FileId") long fileId,
+                                     @RequestParam(value = "Offset") long offset,
+                                     @RequestParam(value = "Size") long size,
+                                     @RequestParam(value = "Bucket") String bucket,
+                                     @RequestParam(value = "Path") String path,
+                                     @RequestParam(value = "File")MultipartFile file) throws Exception{
+        fileService.putFileChunk(file, path, bucket, fileId, offset, size);
+        return SimpleResponse.ok(null);
+    }
+
+    @RequestMapping(value = "/completeMultipartUpload", method = RequestMethod.POST)
+    @ResponseBody
+    public SimpleResponse completeMultipartUpload(@RequestParam(value = "FileId") long fileId,
+                                                  @RequestParam(value = "Bucket")String bucket,
+                                                  @RequestParam(value = "Path")String path)throws Exception{
+        fileService.completeMultipartUpload(fileId, path, bucket);
+        return SimpleResponse.ok(null);
+    }
+
 
 }
