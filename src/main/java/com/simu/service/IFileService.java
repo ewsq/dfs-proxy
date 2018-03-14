@@ -28,6 +28,19 @@ public interface IFileService {
     ResponseEntity getFile(String path, String bucket, String accessId, Long expires, String signature) throws Exception;
 
     /**
+     * 获取压缩文件流(用户版需认证)
+     * @param paths
+     * @param bucket 只支持同一个bucket内的文件
+     * @param zipName
+     * @param accessId
+     * @param expires
+     * @param signature
+     * @return
+     * @throws Exception
+     */
+    ResponseEntity getFilesZip(List<String> paths, String bucket, String zipName, String accessId, Long expires, String signature) throws Exception;
+
+    /**
      *
      * @param path
      * @param bucket

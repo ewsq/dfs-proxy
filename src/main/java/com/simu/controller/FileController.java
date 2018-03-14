@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.List;
 
 /**
  * @author DengrongGuan
@@ -60,6 +61,17 @@ public class FileController {
         return fileService.getFile(path, bucket, accessKeyId, expires, signature);
     }
 
+    @RequestMapping(value = "/batchDownload", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<byte[]> batchDownload(@RequestParam(value = "Paths") List<String> paths,
+                                                @RequestParam(value = "Bucket") String bucket,
+                                                @RequestParam(value = "ZipName") String zipName,
+                                                @RequestParam(value = "AccessKeyId", required = false) String accessKeyId,
+                                                @RequestParam(value = "Expires", required = false) Long expires,
+                                                @RequestParam(value = "Signature", required = false) String signature) throws Exception{
+        return fileService.getFilesZip(paths, bucket, zipName, accessKeyId, expires, signature);
+    }
+
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     @ResponseBody
     public SimpleResponse uploadFile(@RequestParam(value = "Path") String path,
@@ -69,9 +81,6 @@ public class FileController {
                                      @RequestParam(value = "Expires", required = false) Long expires,
                                      @RequestParam(value = "Signature", required = false) String signature,
                                      @RequestParam(value = "Callback", required = false)String callbackUrl) throws Exception{
-        if (expires == null){
-            expires = 0L;
-        }
         fileService.putFile(file,path,bucket,accessKeyId,expires,signature);
         return SimpleResponse.ok(null);
     }
@@ -85,9 +94,6 @@ public class FileController {
                                               @RequestParam(value = "Expires", required = false) Long expires,
                                               @RequestParam(value = "Signature", required = false) String signature,
                                               @RequestParam(value = "Callback", required = false)String callbackUrl) throws Exception{
-        if (expires == null){
-            expires = 0L;
-        }
         return SimpleResponse.ok(fileService.initMultipartUpload(size, path, bucket, accessKeyId,expires, signature));
     }
 
@@ -103,9 +109,6 @@ public class FileController {
                                      @RequestParam(value = "Expires", required = false) Long expires,
                                      @RequestParam(value = "Signature", required = false) String signature,
                                      @RequestParam(value = "Callback", required = false)String callbackUrl)throws Exception{
-        if (expires == null){
-            expires = 0L;
-        }
         fileService.putFileChunk(file, path, bucket, fileId, offset, size, accessKeyId, expires, signature);
         return SimpleResponse.ok(null);
     }
@@ -119,13 +122,8 @@ public class FileController {
                                                   @RequestParam(value = "Expires", required = false) Long expires,
                                                   @RequestParam(value = "Signature", required = false) String signature,
                                                   @RequestParam(value = "Callback", required = false)String callbackUrl)throws Exception{
-        if (expires == null){
-            expires = 0L;
-        }
         fileService.completeMultipartUpload(fileId, path, bucket, accessKeyId, expires, signature);
         return SimpleResponse.ok(null);
     }
-
-
 
 }

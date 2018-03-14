@@ -36,11 +36,14 @@ import javax.activation.MimetypesFileTypeMap;
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * @author DengrongGuan
@@ -76,6 +79,49 @@ public class FileService implements IFileService {
             authDao.validSignature(resource, accessId, expires, signature, RequestMethod.GET);
         }
         return getFile(path, bucket);
+    }
+
+    @Override
+    public ResponseEntity getFilesZip(List<String> paths,String bucket, String zipName, String accessId, Long expires, String signature) throws Exception {
+        Bucket buck = bucketDao.getBucketByName(bucket);
+        if (buck.getIsPublic() == 0) {
+            // 私密
+            List<String> resources = paths.stream().map(p -> "/" + bucket + "/" + p).collect(Collectors.toList());
+            authDao.validSignature(resources, accessId, expires, signature, RequestMethod.GET);
+        }
+        zipName += ".zip";
+        byte[] buffer = new byte[1024];
+        try{
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ZipOutputStream zos = new ZipOutputStream(byteArrayOutputStream);
+            for (String path: paths){
+                String fileName = FileUtil.getSimpleFileName(path);
+                String purePath = FileUtil.getPurePath(path);
+                File fileEntity = fileDao.getFileByPath(buck.getId(), purePath, fileName);
+                if (null == fileEntity) {
+                    throw new ErrorCodeException(ResponseCodeEnum.FILE_NOT_EXIST);
+                }
+                InputStream inputStream = fileTemplate.getFileStream(fileEntity.getNumber()).getInputStream();
+                ZipEntry ze= new ZipEntry(fileName);
+                zos.putNextEntry(ze);
+                int len;
+                while ((len = inputStream.read(buffer)) > 0) {
+                    zos.write(buffer, 0, len);
+                }
+                inputStream.close();
+                zos.closeEntry();
+            }
+            byteArrayOutputStream.flush();
+            zos.close();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            String downloadFileName = new String(zipName.getBytes("UTF-8"),"iso-8859-1");
+            headers.setContentDispositionFormData("attachment", downloadFileName);
+            return new ResponseEntity<>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.CREATED);
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+        return null;
     }
 
     @Override

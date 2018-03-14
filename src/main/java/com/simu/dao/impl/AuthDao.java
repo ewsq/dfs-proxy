@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author DengrongGuan
@@ -42,5 +43,26 @@ public class AuthDao implements IAuthDao{
             throw new ErrorCodeException(ResponseCodeEnum.AUTH_SIGNATURE_NOT_MATCH);
         }
 
+    }
+
+    @Override
+    public void validSignature(List<String> resources, String accessId, Long expires, String signature, RequestMethod verb) throws Exception {
+        // expire test
+        if (null == expires || new Date().getTime() > expires * 1000){
+            throw new ErrorCodeException(ResponseCodeEnum.AUTH_SIGNATURE_EXPIRED);
+        }
+        if (!accessId.equals(this.accessId)){
+            throw new ErrorCodeException(ResponseCodeEnum.AUTH_ACCESS_ID_NOT_MATCH);
+        }
+        StringBuilder canonicalString = new StringBuilder();
+        canonicalString.append(verb.name()).append("\n");
+        canonicalString.append(expires).append("\n");
+        resources.stream().forEach(r -> canonicalString.append(r).append("&"));
+        canonicalString.replace(canonicalString.length()-1, canonicalString.length(),"");
+        String signatureTmp = ServiceSignature.create()
+                .computeSignature(accessKey, canonicalString.toString());
+        if (!signatureTmp.equals(signature)){
+            throw new ErrorCodeException(ResponseCodeEnum.AUTH_SIGNATURE_NOT_MATCH);
+        }
     }
 }

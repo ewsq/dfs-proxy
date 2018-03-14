@@ -38,6 +38,14 @@ public class ManageController {
         map.addAttribute("buckets", buckets);
         return "index";
     }
+    @RequestMapping("/master")
+    public String master(){
+        return "master";
+    }
+    @RequestMapping("/more")
+    public String more(){
+        return "more";
+    }
 
     @RequestMapping("/login")
     public String login() {
