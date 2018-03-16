@@ -37,10 +37,7 @@ import javax.annotation.PostConstruct;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -82,7 +79,10 @@ public class FileService implements IFileService {
     }
 
     @Override
-    public ResponseEntity getFilesZip(List<String> paths,String bucket, String zipName, String accessId, Long expires, String signature) throws Exception {
+    public ResponseEntity getFilesZip(List<String> paths,List<String> routes, String bucket, String zipName, String accessId, Long expires, String signature) throws Exception {
+        if (routes == null){
+            routes = paths.stream().map(p -> FileUtil.getSimpleFileName(p)).collect(Collectors.toList());
+        }
         Bucket buck = bucketDao.getBucketByName(bucket);
         if (buck.getIsPublic() == 0) {
             // 私密
@@ -94,6 +94,7 @@ public class FileService implements IFileService {
         try{
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ZipOutputStream zos = new ZipOutputStream(byteArrayOutputStream);
+            int index = 0;
             for (String path: paths){
                 String fileName = FileUtil.getSimpleFileName(path);
                 String purePath = FileUtil.getPurePath(path);
@@ -102,7 +103,7 @@ public class FileService implements IFileService {
                     throw new ErrorCodeException(ResponseCodeEnum.FILE_NOT_EXIST);
                 }
                 InputStream inputStream = fileTemplate.getFileStream(fileEntity.getNumber()).getInputStream();
-                ZipEntry ze= new ZipEntry(fileName);
+                ZipEntry ze= new ZipEntry(routes.get(index));
                 zos.putNextEntry(ze);
                 int len;
                 while ((len = inputStream.read(buffer)) > 0) {
@@ -110,6 +111,7 @@ public class FileService implements IFileService {
                 }
                 inputStream.close();
                 zos.closeEntry();
+                index++;
             }
             byteArrayOutputStream.flush();
             zos.close();

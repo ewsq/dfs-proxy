@@ -61,15 +61,28 @@ public class FileController {
         return fileService.getFile(path, bucket, accessKeyId, expires, signature);
     }
 
+    /**
+     * OSS不支持批量下载，因此该功能是对OSS的补充
+     * @param paths
+     * @param routes zip的存储路径导航
+     * @param bucket
+     * @param zipName
+     * @param accessKeyId
+     * @param expires
+     * @param signature
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(value = "/batchDownload", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<byte[]> batchDownload(@RequestParam(value = "Paths") List<String> paths,
+                                                @RequestParam(value = "Routes", required = false) List<String> routes,
                                                 @RequestParam(value = "Bucket") String bucket,
                                                 @RequestParam(value = "ZipName") String zipName,
                                                 @RequestParam(value = "AccessKeyId", required = false) String accessKeyId,
                                                 @RequestParam(value = "Expires", required = false) Long expires,
                                                 @RequestParam(value = "Signature", required = false) String signature) throws Exception{
-        return fileService.getFilesZip(paths, bucket, zipName, accessKeyId, expires, signature);
+        return fileService.getFilesZip(paths, routes, bucket, zipName, accessKeyId, expires, signature);
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)

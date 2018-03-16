@@ -30,6 +30,7 @@ public interface IFileService {
     /**
      * 获取压缩文件流(用户版需认证)
      * @param paths
+     * @param routes 为null默认压缩到根目录
      * @param bucket 只支持同一个bucket内的文件
      * @param zipName
      * @param accessId
@@ -38,7 +39,7 @@ public interface IFileService {
      * @return
      * @throws Exception
      */
-    ResponseEntity getFilesZip(List<String> paths, String bucket, String zipName, String accessId, Long expires, String signature) throws Exception;
+    ResponseEntity getFilesZip(List<String> paths, List<String> routes, String bucket, String zipName, String accessId, Long expires, String signature) throws Exception;
 
     /**
      *
