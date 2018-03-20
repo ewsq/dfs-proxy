@@ -59,7 +59,7 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
             <h2 class="sub-header">master节点监控</h2>
             <div class="table-responsive">
-                <table class="table table-striped">
+                <table class="table table-striped" id="statusTable">
                     <thead>
                     <tr>
                         <th>url</th>
@@ -79,11 +79,40 @@
                     </tbody>
                 </table>
             </div>
+            <h2 class="sub-header">volume节点监控</h2>
+            <div class="table-responsive">
+                <table class="table table-striped" id="volumeStatusTable">
+                    <thead>
+                    <tr>
+                        <th>url</th>
+                        <th>状态</th>
+                        <th>数据中心</th>
+                        <th>机架</th>
+                        <th>挂载点</th>
+                        <th>最大分区数</th>
+                        <th>剩余分区数</th>
+                        <th>最大容量</th>
+                        <th>剩余容量</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!--<tr th:each="folder : ${folders}">-->
+                    <!--<td th:text="${folder.id}"></td>-->
+                    <!--<td><a th:href="@{'/bucket/' + ${bucket.id}+'?path='+${path}+${folder.name}+'/'}" th:text="${folder.name}"></a></td>-->
+                    <!--<td></td>-->
+                    <!--<td></td>-->
+                    <!--<td></td>-->
+                    <!--<td><button class="btn btn-default" data-toggle="modal" data-target="#deleteFolder" th:attr="data-id=${folder.id}">删除</button></td>-->
+                    <!--</tr>-->
+                    </tbody>
+                </table>
+            </div>
         </div>
 
     </div>
 </div>
 <div lang="en" th:replace="/fragments/footer :: footer"></div>
 <script src="/js/index.js"></script>
+<script src="/js/master.js"></script>
 </body>
 </html>

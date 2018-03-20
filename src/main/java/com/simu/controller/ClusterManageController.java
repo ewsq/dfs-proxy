@@ -24,4 +24,10 @@ public class ClusterManageController {
     public SimpleResponse getClusterState() throws Exception{
         return SimpleResponse.ok(fileSource.getSystemClusterStatus());
     }
+
+    @RequestMapping(value = "/volumeState", method = RequestMethod.GET)
+    @ResponseBody
+    public SimpleResponse getVolumeState() throws Exception{
+        return SimpleResponse.ok(fileSource.getSystemTopologyStatus());
+    }
 }

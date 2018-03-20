@@ -22,6 +22,8 @@ public class FileSourceConfig {
         FileSource fileSource = new FileSource();
         fileSource.setUrls(Arrays.asList(urls.split(",")));
         fileSource.setConnectionTimeout(1000);
+//        fileSource.setStatusExpiry(5);
+        fileSource.setVolumeStatusCheckInterval(20 * 60); //volume节点状态每隔20分钟更新一次
         fileSource.startup();
         return fileSource;
     }

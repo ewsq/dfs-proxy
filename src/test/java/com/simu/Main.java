@@ -10,7 +10,10 @@ import java.util.zip.ZipOutputStream;
  * @create 2018-02-09
  **/
 public class Main {
-    public static void main(String[] args){
+    public static void main1(String[] args){
+        String a = "s/d/d/s/";
+        String[] as = a.split("/");
+        long l = Long.parseLong("");
         try {
             FileOutputStream f = new FileOutputStream("/Users/dengrongguan/test.zip");
             ZipOutputStream zip = new ZipOutputStream(new BufferedOutputStream(f));
@@ -48,5 +51,19 @@ public class Main {
         } catch(Exception e) {
             System.out.println(e.getMessage());
         }
+
+    }
+
+    public static void main(String[] args) {
+        Long longInstance = new Long(15);
+        Object value = longInstance;
+        convertDouble(value);
+    }
+
+    static double convertDouble(Object longValue){
+        Long valueOne = (Long) longValue;
+        double valueTwo = (double)valueOne;
+        System.out.println(valueTwo);
+        return valueTwo;
     }
 }
