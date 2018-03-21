@@ -98,6 +98,7 @@ public class FileController {
         return SimpleResponse.ok(null);
     }
 
+
     @RequestMapping(value = "/initMultipartUpload", method = RequestMethod.POST)
     @ResponseBody
     public SimpleResponse initMultipartUpload(@RequestParam(value = "Path") String path,

@@ -11,6 +11,9 @@ weed:
   auth:
     accessId: MtwtIlsti1P6UKDx
     accessKey: JN7fXj9sNPbLkfUTQh1zcJpwLPncHo
+  subscriber:
+    email: 15950570277@163.com
+    phone: 15950570277
 
 multipart:
   enabled: true
