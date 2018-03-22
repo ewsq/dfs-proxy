@@ -172,4 +172,11 @@ public interface IFileService {
      * @param folderIds
      */
     void rmFolders(Long[] folderIds);
+
+    /**
+     * 根据文件path删除文件
+     * @param bucket
+     * @param filePath
+     */
+    void rmFile(String bucket, String filePath, String accessId, Long expires, String signature);
 }

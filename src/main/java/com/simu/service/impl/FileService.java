@@ -369,6 +369,16 @@ public class FileService implements IFileService {
         }
     }
 
+    @Override
+    public void rmFile(String bucket, String filePath, String accessId, Long expires, String signature){
+        authDao.validSignature(filePath, accessId, expires, signature, RequestMethod.POST);
+        Bucket buc = bucketDao.getBucketByName(bucket);
+        if (buc != null){
+            throw new ErrorCodeException(ResponseCodeEnum.BUCKET_NOT_EXIST);
+        }
+        fileDao.deleteFile(buc.getId(), filePath);
+    }
+
     /**
      * delete file without throw IOException
      *

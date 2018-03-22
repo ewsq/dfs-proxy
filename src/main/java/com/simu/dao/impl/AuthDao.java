@@ -25,7 +25,7 @@ public class AuthDao implements IAuthDao{
     private String accessKey;
 
     @Override
-    public void validSignature(String resource, String accessId, Long expires, String signature, RequestMethod verb) throws Exception{
+    public void validSignature(String resource, String accessId, Long expires, String signature, RequestMethod verb) throws RuntimeException{
         // expire test
         if (null == expires || new Date().getTime() > expires * 1000){
             throw new ErrorCodeException(ResponseCodeEnum.AUTH_SIGNATURE_EXPIRED);
@@ -46,7 +46,7 @@ public class AuthDao implements IAuthDao{
     }
 
     @Override
-    public void validSignature(List<String> resources, String accessId, Long expires, String signature, RequestMethod verb) throws Exception {
+    public void validSignature(List<String> resources, String accessId, Long expires, String signature, RequestMethod verb) throws RuntimeException {
         // expire test
         if (null == expires || new Date().getTime() > expires * 1000){
             throw new ErrorCodeException(ResponseCodeEnum.AUTH_SIGNATURE_EXPIRED);

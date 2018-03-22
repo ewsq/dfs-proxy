@@ -98,6 +98,17 @@ public class FileController {
         return SimpleResponse.ok(null);
     }
 
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    @ResponseBody
+    public SimpleResponse deleteFile(@RequestParam(value = "Path") String path,
+                                     @RequestParam(value = "Bucket") String bucket,
+                                     @RequestParam(value = "AccessKeyId", required = false) String accessKeyId,
+                                     @RequestParam(value = "Expires", required = false) Long expires,
+                                     @RequestParam(value = "Signature", required = false) String signature){
+        fileService.rmFile(bucket, path, accessKeyId, expires, signature);
+        return SimpleResponse.ok(null);
+    }
+
 
     @RequestMapping(value = "/initMultipartUpload", method = RequestMethod.POST)
     @ResponseBody

@@ -19,7 +19,7 @@ public interface IAuthDao {
      * @param verb
      * @throws Exception
      */
-    void validSignature(String resource, String accessId, Long expires, String signature, RequestMethod verb) throws Exception;
+    void validSignature(String resource, String accessId, Long expires, String signature, RequestMethod verb) throws RuntimeException;
 
     /**
      * 批量下载接口认证
@@ -30,5 +30,5 @@ public interface IAuthDao {
      * @param verb
      * @throws Exception
      */
-    void validSignature(List<String> resources, String accessId, Long expires, String signature, RequestMethod verb) throws Exception;
+    void validSignature(List<String> resources, String accessId, Long expires, String signature, RequestMethod verb) throws RuntimeException;
 }

@@ -55,4 +55,12 @@ public interface IFileDao {
      * @return
      */
     File findById(long id);
+
+    /**
+     * 根据bucket，path删除文件
+     * @param bucketId
+     * @param path
+     * @return
+     */
+    File deleteFile(long bucketId, String path);
 }

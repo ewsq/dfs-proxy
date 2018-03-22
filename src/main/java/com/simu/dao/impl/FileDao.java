@@ -56,5 +56,12 @@ public class FileDao implements IFileDao {
         return DStatement.build(File.class).findById(id);
     }
 
+    @Override
+    public File deleteFile(long bucketId, String path) {
+        File file = DStatement.build(File.class).bucketId(bucketId).path(path).selectOne();
+        file.delete();
+        return file;
+    }
+
 
 }
