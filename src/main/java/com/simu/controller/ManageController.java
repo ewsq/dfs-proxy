@@ -61,8 +61,8 @@ public class ManageController {
         if (null == bucket){
             return "404";
         }
-        List<String> paths = new ArrayList<>();
-        List<String> urls = new ArrayList<>();
+        List<String> paths = new ArrayList<>();//用于显示导航
+        List<String> urls = new ArrayList<>();//用于导航点击
         paths.add("根目录");
         String baseUrl = "/bucket/"+id+(keyword == null?"":"?keyword="+keyword);
         urls.add(baseUrl);
@@ -77,7 +77,7 @@ public class ManageController {
         }
         urls.remove(urls.size() - 1);
         urls.add(null);
-        Map<String,List> foldersAndFiles = fileService.getFileAndFoldersByPath(id, path, keyword);
+        Map<String,List> foldersAndFiles = fileService.getFileAndFoldersByPath(id, path, keyword);//获取文件及文件夹
         map.addAttribute("urls",urls);
         map.addAttribute("paths", paths);
         if (null == path){
