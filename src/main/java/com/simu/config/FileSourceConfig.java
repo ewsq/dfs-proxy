@@ -25,7 +25,7 @@ public class FileSourceConfig {
     }
 
     @Bean("fileSource")
-    public FileSource getFileSource(@Value("${weed.servers.urls}")String urls, @Qualifier("warningSendUtil")WarningSendUtilImpl warningSendUtil) throws Exception{
+    public FileSource getFileSource(@Value("${weed.servers.urls}")String urls, @Qualifier("warningSendUtil")WarningSendUtil warningSendUtil) throws Exception{
         FileSource fileSource = new FileSource();
         fileSource.setUrls(Arrays.asList(urls.split(",")));
         fileSource.setConnectionTimeout(1000);

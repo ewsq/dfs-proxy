@@ -252,29 +252,21 @@ function uploadFile(){
     $('#uploadFileBtn').attr('disabled','disabled');
     var formData = new FormData();
     var f = $('#file')[0].files[0];
-//    alert(f.size);
-    // 超过50M分片
     if(f.size < 50 * 1024 * 1024){
         formData.append('File', f);
         formData.append('Bucket', $('#bucketName').val());
         formData.append('Path',$('#path').val()+$('#file')[0].files[0].name);
         upload(formData).then((res) => {
-            console.log(res)
             location.reload()
         })
     }else{
-        //超过100M 进行文件分片传输，默认50M一个分片
+        //超过50M 进行文件分片传输，默认50M一个分片
         formData.append('Bucket', $('#bucketName').val());
         formData.append('Path', $('#path').val()+$('#file')[0].files[0].name);
         formData.append('Size', f.size);
         initMultipartUpload(formData).then((res) => {
-//            console.log(res);
             return res;
         }).then((res) => {
-//            console.log(res.data)
-//            Promise.all([upload1(1), upload2(2)]).then(res => {
-//
-//            })
             if(res.code != 0){
                 alert(res.data);
             }else{
