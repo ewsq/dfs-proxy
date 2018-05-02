@@ -151,4 +151,10 @@ public class FileController {
         return SimpleResponse.ok(null);
     }
 
+    @RequestMapping(value = "/test", method = RequestMethod.POST)
+    @ResponseBody
+    public SimpleResponse completeMultipartUpload(@RequestParam(value = "FileId", required = false) Long fileId)throws Exception{
+        return SimpleResponse.ok(fileId);
+    }
+
 }
