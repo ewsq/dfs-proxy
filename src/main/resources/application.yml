@@ -17,7 +17,11 @@ weed:
 
 multipart:
   enabled: true
+server:
+  port: 9334
 spring:
+  application:
+    name: dfs-proxy
   http:
     multipart:
       max-file-size: 500000KB
