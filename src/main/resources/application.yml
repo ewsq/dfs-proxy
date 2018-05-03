@@ -48,7 +48,7 @@ spring:
 ####################### stream Config & Datasource Config###########################
 druid:
   datasource:
-    url: jdbc:mysql://localhost:3306/simu_dfs_proxy?autoReconnect=true&rewriteBatchedStatements=true&socketTimeout=30000&connectTimeout=3000&useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mysql://192.168.1.204:3306/simu_dfs_proxy?autoReconnect=true&rewriteBatchedStatements=true&socketTimeout=30000&connectTimeout=3000&useUnicode=true&characterEncoding=UTF-8
     username: dfs-proxy
     password: Superid123
     #初始化连接数量，最大最小连接数
