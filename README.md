@@ -1,2 +1,3 @@
-# dfs-proxy
-weed dfs proxy
+# 系统简介
+该系统基于开源的SeaweedFS文件系统，利用了其基本的分布式存储和备份功能。代理模块直接采用Spring Boot来搭建，数据层基于MySQL数据库，Druid作为数据库连接池，同时也带有可选的redis缓存，以加快数据的存取速度和减轻数据库负载。文件系统的管理模块使用MVC的设计思想，前端基于Thymeleaf模板技术，结合Bootstrap框架、jQuery库、AJAX技术实现数据的展示和近实时更新。
+
